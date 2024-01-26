@@ -5,6 +5,9 @@ import threading
 import time
 import wave
 from pathlib import Path
+import serial
+import csv
+from datetime import datetime
 
 import cv2
 import numpy as np
@@ -18,6 +21,26 @@ JOINT_NAMES = [
     "right_collar", "right_shoulder", "right_elbow", "right_wrist", "right_hand",
     "left_hip",  "left_knee",  "left_ankle",
     "right_hip", "right_knee", "right_ankle",
+]
+
+JOINT_CONNECTIONS = [
+    ("head", "neck"),
+    ("neck", "torso"),
+    ("torso", "waist"),
+    ("waist", "left_hip"),
+    ("waist", "right_hip"),
+    ("left_collar", "left_shoulder"),
+    ("left_shoulder", "left_elbow"),
+    ("left_elbow", "left_wrist"),
+    ("left_wrist", "left_hand"),
+    ("right_collar", "right_shoulder"),
+    ("right_shoulder", "right_elbow"),
+    ("right_elbow", "right_wrist"),
+    ("right_wrist", "right_hand"),
+    ("left_hip", "left_knee"),
+    ("left_knee", "left_ankle"),
+    ("right_hip", "right_knee"),
+    ("right_knee", "right_ankle"),
 ]
 # fmt: on
 
@@ -81,6 +104,30 @@ def start_mp4_recording(output_path):
     threading.Thread(target=reader_thread).start()
     return proc
 
+def read_data(ser, writer):
+    writer.writerow(['timestamp', 'reading'])
+
+    while True:
+        # Read data from Serial until \n (new line) received
+        ser_bytes = ser.readline()
+
+        print(ser_bytes)
+
+        # Convert received bytes to text format
+        decoded_bytes = ser_bytes[0:len(ser_bytes)-2].decode("utf-8")
+        print(decoded_bytes)
+
+        # Retrieve current time
+        c = datetime.now()
+        current_time = c.strftime('%H:%M:%S')
+        print(current_time)
+
+        # If Arduino has sent a string "stop", exit loop
+        if decoded_bytes == "stop":
+            break
+
+        # Write received data to CSV file
+        writer.writerow([time.time(), decoded_bytes])
 
 def main():
     nuitrack = py_nuitrack.Nuitrack()
@@ -101,7 +148,10 @@ def main():
     nuitrack.create_modules()
     nuitrack.run()
 
-    session_name = "test_session"
+
+    session_name = "lab_session_8" #CHANGE SESSION NAME
+
+
     root_path = Path() / "sessions" / session_name
     if not root_path.exists():
         root_path.mkdir(parents=True)
@@ -140,6 +190,22 @@ def main():
     audio_thread = threading.Thread(target=record_audio)
     audio_thread.start()
 
+    # Open the serial port and CSV file
+    ser = serial.Serial('/dev/ttyACM0')
+    ser.flushInput()
+
+    csv_file = open('./sessions/'+session_name+'/data.csv',mode='a')
+    #csv_file = open('rich1.csv',mode='a')
+    csv_writer = csv.writer(csv_file, delimiter=",", escapechar=' ', quoting=csv.QUOTE_NONE)
+
+    # Write out a single character encoded in utf-8; this is default encoding for Arduino serial comms
+    ser.write(bytes('x', 'utf-8'))
+
+    # Create a thread for reading data
+    read_data_thread = threading.Thread(target=read_data, args=(ser, csv_writer))
+    # Start the thread
+    read_data_thread.start()
+    
     # Clear data.json
     with open(json_filename, "w") as file:
         file.write("")
@@ -169,17 +235,22 @@ def main():
     stream.stop_stream()
     stream.close()
 
+    out.release()
+    cv2.destroyAllWindows()
+    print("Video saved")
+    nuitrack.release()
+    print("Nuitrack tracking module released")
+    ser.close()
+    csv_file.close()
+    print("Logging finished")
+
     # Save audio to a WAV file
     with wave.open(str(audio_filename), "wb") as wf:
         wf.setnchannels(channels)
         wf.setsampwidth(pyaudio.PyAudio().get_sample_size(sample_format))
         wf.setframerate(fs)
         wf.writeframes(b"".join(frames))
-
-    out.release()
-    cv2.destroyAllWindows()
-    nuitrack.release()
-
+    print("Audio saved")
 
 if __name__ == "__main__":
     main()

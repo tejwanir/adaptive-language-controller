@@ -17,8 +17,10 @@ from PyNuitrack import py_nuitrack
 # fmt: off
 JOINT_NAMES = [
     "head", "neck", "torso", "waist",
-    "left_collar",  "left_shoulder",  "left_elbow",  "left_wrist",  "left_hand",
-    "right_collar", "right_shoulder", "right_elbow", "right_wrist", "right_hand",
+    "left_collar",  "left_shoulder",  "left_elbow", "left_hand",
+    #"left_wrist",  
+    "right_collar", "right_shoulder", "right_elbow", "right_hand",
+    #"right_wrist", 
     "left_hip",  "left_knee",  "left_ankle",
     "right_hip", "right_knee", "right_ankle",
 ]
@@ -31,12 +33,14 @@ JOINT_CONNECTIONS = [
     ("waist", "right_hip"),
     ("left_collar", "left_shoulder"),
     ("left_shoulder", "left_elbow"),
-    ("left_elbow", "left_wrist"),
-    ("left_wrist", "left_hand"),
+    #("left_elbow", "left_wrist"),
+    #("left_wrist", "left_hand"),
+    ("left_elbow", "left_hand"), #change due to wrist not being accurate
     ("right_collar", "right_shoulder"),
     ("right_shoulder", "right_elbow"),
-    ("right_elbow", "right_wrist"),
-    ("right_wrist", "right_hand"),
+    #("right_elbow", "right_wrist"),
+    #("right_wrist", "right_hand"),
+    ("right_elbow", "right_hand"), #change due to wrist not being accurate
     ("left_hip", "left_knee"),
     ("left_knee", "left_ankle"),
     ("right_hip", "right_knee"),

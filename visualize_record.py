@@ -7,6 +7,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.animation import FuncAnimation
 
+'''
+Changed joint and connection names (removed wrist)
+'''
+
 # Assuming JOINT_NAMES is a list of joint names
 from record import JOINT_NAMES, JOINT_CONNECTIONS
 
@@ -22,8 +26,33 @@ class Poses(TypedDict):
     timestamp: float
     skeletons: List[Skeleton]
 
-def main():
+'''
+Added chunk below
+'''
 
+
+u1=1
+u2=2
+
+def fix_poses_and_save(input_file_path: str, output_file_path: str):
+    with open(input_file_path, 'r') as input_file, open(output_file_path, 'w') as output_file:
+        for line in input_file:
+            pose = json.loads(line)
+            
+            # Find skeletons for user_id 2 and 3
+            user_2_skel = next((skel for skel in pose["skeletons"] if skel["user_id"] == u1), None)
+            user_3_skel = next((skel for skel in pose["skeletons"] if skel["user_id"] == u2), None)
+            
+            # Update user_3's left hand to match user_2's right hand
+            if user_2_skel and user_3_skel:
+                if "right_hand" in user_2_skel and "left_hand" in user_3_skel:
+                    user_3_skel["left_hand"]["real"] = user_2_skel["right_hand"]["real"]
+            
+            # Write the modified pose back to the new file
+            output_file.write(json.dumps(pose) + '\n')
+
+def main():
+    
     session_name = "lab_session_7" # CHANGE SESSION NAME TO VISUALIZE
 
     root_dir = Path() / "sessions" / session_name
@@ -32,6 +61,28 @@ def main():
         for line in file:
             poses.append(Poses(json.loads(line)))
     print(f"Loaded {len(poses)} poses")
+
+    '''
+    Added chunk below
+    '''
+
+    input_file_path = root_dir / "cut_poses.jsonl"
+    output_file_path = root_dir / "cut_poses_error_fix.jsonl"
+
+    # Call the function to process and save the fixed poses
+    fix_poses_and_save(input_file_path, output_file_path)
+
+    '''
+    Added chunk below
+    '''
+
+    # Update user_2's left hand to match user_1's right hand
+    for pose in poses:
+        user_1_skel = next((skel for skel in pose["skeletons"] if skel["user_id"] == u1), None)
+        user_2_skel = next((skel for skel in pose["skeletons"] if skel["user_id"] == u2), None)
+        if user_1_skel and user_2_skel:
+            if "right_hand" in user_1_skel and "left_hand" in user_2_skel:
+                user_2_skel["left_hand"]["real"] = user_1_skel["right_hand"]["real"]
 
     # Store keypoints for each skeleton in each pose
     all_keypoints: List[List[np.ndarray]] = []
@@ -100,6 +151,14 @@ def main():
 
         for skeleton_index, skeleton in enumerate(all_keypoints[cur_idx]):
             for conn_line, (joint1, joint2) in zip(connection_lines[skeleton_index], JOINT_CONNECTIONS):
+
+                '''
+                Added a condition to remove wrist from joint names
+                '''
+
+                if("wrist" in joint1 or "wrist" in joint2):
+                    continue
+
                 try:
                     idx1 = get_joint_index(joint1)
                     idx2 = get_joint_index(joint2)
@@ -119,8 +178,8 @@ def main():
 
     # Set up different camera perspectives
     perspectives = [
-        {"azim": -90, "elev": 0, "filename": str(root_dir / "front_perspective.mp4")},
-        {"azim": -90, "elev": 90, "filename": str(root_dir / "top_perspective.mp4")},
+        {"azim": -90, "elev": 0, "filename": str(root_dir / "front_perspective_error_fix.mp4")},
+        {"azim": -90, "elev": 90, "filename": str(root_dir / "top_perspective_error_fix.mp4")},
     ]
 
     print("Recording starting")

@@ -7,6 +7,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.animation import FuncAnimation
 
+'''
+Changed joint and connection names (removed wrist)
+'''
+
 # Assuming JOINT_NAMES is a list of joint names
 from record import JOINT_NAMES, JOINT_CONNECTIONS
 
@@ -24,7 +28,7 @@ class Poses(TypedDict):
 
 def main():
 
-    session_name = "lab_session_3" # CHANGE SESSION NAME TO VISUALIZE
+    session_name = "lab_session_7" # CHANGE SESSION NAME TO VISUALIZE
 
     root_dir = Path() / "sessions" / session_name
     poses: List[Poses] = []
@@ -32,6 +36,19 @@ def main():
         for line in file:
             poses.append(Poses(json.loads(line)))
     print(f"Loaded {len(poses)} poses")
+
+    '''
+    Added chunk below
+    '''
+
+    # Update user_2's left hand to match user_1's right hand
+    for pose in poses:
+        user_1_skel = next((skel for skel in pose["skeletons"] if skel["user_id"] == 1), None)
+        user_2_skel = next((skel for skel in pose["skeletons"] if skel["user_id"] == 2), None)
+        if user_1_skel and user_2_skel:
+            if "right_hand" in user_1_skel and "left_hand" in user_2_skel:
+                user_2_skel["left_hand"]["real"] = user_1_skel["right_hand"]["real"]
+
 
     # Store keypoints for each skeleton in each pose
     all_keypoints: List[List[np.ndarray]] = []
@@ -97,6 +114,13 @@ def main():
 
         for skeleton_index, skeleton in enumerate(all_keypoints[cur_idx]):
             for conn_line, (joint1, joint2) in zip(connection_lines[skeleton_index], JOINT_CONNECTIONS):
+
+                '''
+                Added a condition to remove wrist from joint names
+                '''
+
+                if("wrist" in joint1 or "wrist" in joint2):
+                    continue
                 try:
                     idx1 = get_joint_index(joint1)
                     idx2 = get_joint_index(joint2)

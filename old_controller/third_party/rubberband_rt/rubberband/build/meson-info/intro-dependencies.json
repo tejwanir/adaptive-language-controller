@@ -1,0 +1,1 @@
+[{"name": "sndfile", "version": "1.0.28", "compile_args": [], "link_args": ["/usr/lib/x86_64-linux-gnu/libsndfile.so"]}, {"name": "threads", "version": "unknown", "compile_args": ["-pthread"], "link_args": ["-pthread"]}]

@@ -1,0 +1,140 @@
+[
+  {
+    "directory": "/mnt/c/Users/alber/adaptive-language-controller/old_controller/third_party/rubberband_rt/rubberband/build",
+    "command": "c++ -Irubberband_objlib@sta -I. -I.. -I../rubberband -I../src -fdiagnostics-color=always -pipe -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wnon-virtual-dtor -Wextra -Wpedantic -std=c++11 -O3 -fPIC -pthread -DUSE_BUILTIN_FFT -DUSE_BQRESAMPLER -DNO_THREAD_CHECKS -DNO_TIMING -DNDEBUG -DUSE_PTHREADS -DHAVE_POSIX_MEMALIGN -MD -MQ 'rubberband_objlib@sta/src_rubberband-c.cpp.o' -MF 'rubberband_objlib@sta/src_rubberband-c.cpp.o.d' -o 'rubberband_objlib@sta/src_rubberband-c.cpp.o' -c ../src/rubberband-c.cpp",
+    "file": "../src/rubberband-c.cpp",
+    "output": "rubberband_objlib@sta/src_rubberband-c.cpp.o"
+  },
+  {
+    "directory": "/mnt/c/Users/alber/adaptive-language-controller/old_controller/third_party/rubberband_rt/rubberband/build",
+    "command": "c++ -Irubberband_objlib@sta -I. -I.. -I../rubberband -I../src -fdiagnostics-color=always -pipe -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wnon-virtual-dtor -Wextra -Wpedantic -std=c++11 -O3 -fPIC -pthread -DUSE_BUILTIN_FFT -DUSE_BQRESAMPLER -DNO_THREAD_CHECKS -DNO_TIMING -DNDEBUG -DUSE_PTHREADS -DHAVE_POSIX_MEMALIGN -MD -MQ 'rubberband_objlib@sta/src_RubberBandStretcher.cpp.o' -MF 'rubberband_objlib@sta/src_RubberBandStretcher.cpp.o.d' -o 'rubberband_objlib@sta/src_RubberBandStretcher.cpp.o' -c ../src/RubberBandStretcher.cpp",
+    "file": "../src/RubberBandStretcher.cpp",
+    "output": "rubberband_objlib@sta/src_RubberBandStretcher.cpp.o"
+  },
+  {
+    "directory": "/mnt/c/Users/alber/adaptive-language-controller/old_controller/third_party/rubberband_rt/rubberband/build",
+    "command": "c++ -Irubberband_objlib@sta -I. -I.. -I../rubberband -I../src -fdiagnostics-color=always -pipe -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wnon-virtual-dtor -Wextra -Wpedantic -std=c++11 -O3 -fPIC -pthread -DUSE_BUILTIN_FFT -DUSE_BQRESAMPLER -DNO_THREAD_CHECKS -DNO_TIMING -DNDEBUG -DUSE_PTHREADS -DHAVE_POSIX_MEMALIGN -MD -MQ 'rubberband_objlib@sta/src_faster_AudioCurveCalculator.cpp.o' -MF 'rubberband_objlib@sta/src_faster_AudioCurveCalculator.cpp.o.d' -o 'rubberband_objlib@sta/src_faster_AudioCurveCalculator.cpp.o' -c ../src/faster/AudioCurveCalculator.cpp",
+    "file": "../src/faster/AudioCurveCalculator.cpp",
+    "output": "rubberband_objlib@sta/src_faster_AudioCurveCalculator.cpp.o"
+  },
+  {
+    "directory": "/mnt/c/Users/alber/adaptive-language-controller/old_controller/third_party/rubberband_rt/rubberband/build",
+    "command": "c++ -Irubberband_objlib@sta -I. -I.. -I../rubberband -I../src -fdiagnostics-color=always -pipe -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wnon-virtual-dtor -Wextra -Wpedantic -std=c++11 -O3 -fPIC -pthread -DUSE_BUILTIN_FFT -DUSE_BQRESAMPLER -DNO_THREAD_CHECKS -DNO_TIMING -DNDEBUG -DUSE_PTHREADS -DHAVE_POSIX_MEMALIGN -MD -MQ 'rubberband_objlib@sta/src_faster_CompoundAudioCurve.cpp.o' -MF 'rubberband_objlib@sta/src_faster_CompoundAudioCurve.cpp.o.d' -o 'rubberband_objlib@sta/src_faster_CompoundAudioCurve.cpp.o' -c ../src/faster/CompoundAudioCurve.cpp",
+    "file": "../src/faster/CompoundAudioCurve.cpp",
+    "output": "rubberband_objlib@sta/src_faster_CompoundAudioCurve.cpp.o"
+  },
+  {
+    "directory": "/mnt/c/Users/alber/adaptive-language-controller/old_controller/third_party/rubberband_rt/rubberband/build",
+    "command": "c++ -Irubberband_objlib@sta -I. -I.. -I../rubberband -I../src -fdiagnostics-color=always -pipe -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wnon-virtual-dtor -Wextra -Wpedantic -std=c++11 -O3 -fPIC -pthread -DUSE_BUILTIN_FFT -DUSE_BQRESAMPLER -DNO_THREAD_CHECKS -DNO_TIMING -DNDEBUG -DUSE_PTHREADS -DHAVE_POSIX_MEMALIGN -MD -MQ 'rubberband_objlib@sta/src_faster_HighFrequencyAudioCurve.cpp.o' -MF 'rubberband_objlib@sta/src_faster_HighFrequencyAudioCurve.cpp.o.d' -o 'rubberband_objlib@sta/src_faster_HighFrequencyAudioCurve.cpp.o' -c ../src/faster/HighFrequencyAudioCurve.cpp",
+    "file": "../src/faster/HighFrequencyAudioCurve.cpp",
+    "output": "rubberband_objlib@sta/src_faster_HighFrequencyAudioCurve.cpp.o"
+  },
+  {
+    "directory": "/mnt/c/Users/alber/adaptive-language-controller/old_controller/third_party/rubberband_rt/rubberband/build",
+    "command": "c++ -Irubberband_objlib@sta -I. -I.. -I../rubberband -I../src -fdiagnostics-color=always -pipe -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wnon-virtual-dtor -Wextra -Wpedantic -std=c++11 -O3 -fPIC -pthread -DUSE_BUILTIN_FFT -DUSE_BQRESAMPLER -DNO_THREAD_CHECKS -DNO_TIMING -DNDEBUG -DUSE_PTHREADS -DHAVE_POSIX_MEMALIGN -MD -MQ 'rubberband_objlib@sta/src_faster_SilentAudioCurve.cpp.o' -MF 'rubberband_objlib@sta/src_faster_SilentAudioCurve.cpp.o.d' -o 'rubberband_objlib@sta/src_faster_SilentAudioCurve.cpp.o' -c ../src/faster/SilentAudioCurve.cpp",
+    "file": "../src/faster/SilentAudioCurve.cpp",
+    "output": "rubberband_objlib@sta/src_faster_SilentAudioCurve.cpp.o"
+  },
+  {
+    "directory": "/mnt/c/Users/alber/adaptive-language-controller/old_controller/third_party/rubberband_rt/rubberband/build",
+    "command": "c++ -Irubberband_objlib@sta -I. -I.. -I../rubberband -I../src -fdiagnostics-color=always -pipe -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wnon-virtual-dtor -Wextra -Wpedantic -std=c++11 -O3 -fPIC -pthread -DUSE_BUILTIN_FFT -DUSE_BQRESAMPLER -DNO_THREAD_CHECKS -DNO_TIMING -DNDEBUG -DUSE_PTHREADS -DHAVE_POSIX_MEMALIGN -MD -MQ 'rubberband_objlib@sta/src_faster_PercussiveAudioCurve.cpp.o' -MF 'rubberband_objlib@sta/src_faster_PercussiveAudioCurve.cpp.o.d' -o 'rubberband_objlib@sta/src_faster_PercussiveAudioCurve.cpp.o' -c ../src/faster/PercussiveAudioCurve.cpp",
+    "file": "../src/faster/PercussiveAudioCurve.cpp",
+    "output": "rubberband_objlib@sta/src_faster_PercussiveAudioCurve.cpp.o"
+  },
+  {
+    "directory": "/mnt/c/Users/alber/adaptive-language-controller/old_controller/third_party/rubberband_rt/rubberband/build",
+    "command": "c++ -Irubberband_objlib@sta -I. -I.. -I../rubberband -I../src -fdiagnostics-color=always -pipe -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wnon-virtual-dtor -Wextra -Wpedantic -std=c++11 -O3 -fPIC -pthread -DUSE_BUILTIN_FFT -DUSE_BQRESAMPLER -DNO_THREAD_CHECKS -DNO_TIMING -DNDEBUG -DUSE_PTHREADS -DHAVE_POSIX_MEMALIGN -MD -MQ 'rubberband_objlib@sta/src_faster_R2Stretcher.cpp.o' -MF 'rubberband_objlib@sta/src_faster_R2Stretcher.cpp.o.d' -o 'rubberband_objlib@sta/src_faster_R2Stretcher.cpp.o' -c ../src/faster/R2Stretcher.cpp",
+    "file": "../src/faster/R2Stretcher.cpp",
+    "output": "rubberband_objlib@sta/src_faster_R2Stretcher.cpp.o"
+  },
+  {
+    "directory": "/mnt/c/Users/alber/adaptive-language-controller/old_controller/third_party/rubberband_rt/rubberband/build",
+    "command": "c++ -Irubberband_objlib@sta -I. -I.. -I../rubberband -I../src -fdiagnostics-color=always -pipe -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wnon-virtual-dtor -Wextra -Wpedantic -std=c++11 -O3 -fPIC -pthread -DUSE_BUILTIN_FFT -DUSE_BQRESAMPLER -DNO_THREAD_CHECKS -DNO_TIMING -DNDEBUG -DUSE_PTHREADS -DHAVE_POSIX_MEMALIGN -MD -MQ 'rubberband_objlib@sta/src_faster_StretcherChannelData.cpp.o' -MF 'rubberband_objlib@sta/src_faster_StretcherChannelData.cpp.o.d' -o 'rubberband_objlib@sta/src_faster_StretcherChannelData.cpp.o' -c ../src/faster/StretcherChannelData.cpp",
+    "file": "../src/faster/StretcherChannelData.cpp",
+    "output": "rubberband_objlib@sta/src_faster_StretcherChannelData.cpp.o"
+  },
+  {
+    "directory": "/mnt/c/Users/alber/adaptive-language-controller/old_controller/third_party/rubberband_rt/rubberband/build",
+    "command": "c++ -Irubberband_objlib@sta -I. -I.. -I../rubberband -I../src -fdiagnostics-color=always -pipe -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wnon-virtual-dtor -Wextra -Wpedantic -std=c++11 -O3 -fPIC -pthread -DUSE_BUILTIN_FFT -DUSE_BQRESAMPLER -DNO_THREAD_CHECKS -DNO_TIMING -DNDEBUG -DUSE_PTHREADS -DHAVE_POSIX_MEMALIGN -MD -MQ 'rubberband_objlib@sta/src_faster_StretcherProcess.cpp.o' -MF 'rubberband_objlib@sta/src_faster_StretcherProcess.cpp.o.d' -o 'rubberband_objlib@sta/src_faster_StretcherProcess.cpp.o' -c ../src/faster/StretcherProcess.cpp",
+    "file": "../src/faster/StretcherProcess.cpp",
+    "output": "rubberband_objlib@sta/src_faster_StretcherProcess.cpp.o"
+  },
+  {
+    "directory": "/mnt/c/Users/alber/adaptive-language-controller/old_controller/third_party/rubberband_rt/rubberband/build",
+    "command": "c++ -Irubberband_objlib@sta -I. -I.. -I../rubberband -I../src -fdiagnostics-color=always -pipe -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wnon-virtual-dtor -Wextra -Wpedantic -std=c++11 -O3 -fPIC -pthread -DUSE_BUILTIN_FFT -DUSE_BQRESAMPLER -DNO_THREAD_CHECKS -DNO_TIMING -DNDEBUG -DUSE_PTHREADS -DHAVE_POSIX_MEMALIGN -MD -MQ 'rubberband_objlib@sta/src_common_Allocators.cpp.o' -MF 'rubberband_objlib@sta/src_common_Allocators.cpp.o.d' -o 'rubberband_objlib@sta/src_common_Allocators.cpp.o' -c ../src/common/Allocators.cpp",
+    "file": "../src/common/Allocators.cpp",
+    "output": "rubberband_objlib@sta/src_common_Allocators.cpp.o"
+  },
+  {
+    "directory": "/mnt/c/Users/alber/adaptive-language-controller/old_controller/third_party/rubberband_rt/rubberband/build",
+    "command": "c++ -Irubberband_objlib@sta -I. -I.. -I../rubberband -I../src -fdiagnostics-color=always -pipe -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wnon-virtual-dtor -Wextra -Wpedantic -std=c++11 -O3 -fPIC -pthread -DUSE_BUILTIN_FFT -DUSE_BQRESAMPLER -DNO_THREAD_CHECKS -DNO_TIMING -DNDEBUG -DUSE_PTHREADS -DHAVE_POSIX_MEMALIGN -MD -MQ 'rubberband_objlib@sta/src_common_FFT.cpp.o' -MF 'rubberband_objlib@sta/src_common_FFT.cpp.o.d' -o 'rubberband_objlib@sta/src_common_FFT.cpp.o' -c ../src/common/FFT.cpp",
+    "file": "../src/common/FFT.cpp",
+    "output": "rubberband_objlib@sta/src_common_FFT.cpp.o"
+  },
+  {
+    "directory": "/mnt/c/Users/alber/adaptive-language-controller/old_controller/third_party/rubberband_rt/rubberband/build",
+    "command": "c++ -Irubberband_objlib@sta -I. -I.. -I../rubberband -I../src -fdiagnostics-color=always -pipe -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wnon-virtual-dtor -Wextra -Wpedantic -std=c++11 -O3 -fPIC -pthread -DUSE_BUILTIN_FFT -DUSE_BQRESAMPLER -DNO_THREAD_CHECKS -DNO_TIMING -DNDEBUG -DUSE_PTHREADS -DHAVE_POSIX_MEMALIGN -MD -MQ 'rubberband_objlib@sta/src_common_Log.cpp.o' -MF 'rubberband_objlib@sta/src_common_Log.cpp.o.d' -o 'rubberband_objlib@sta/src_common_Log.cpp.o' -c ../src/common/Log.cpp",
+    "file": "../src/common/Log.cpp",
+    "output": "rubberband_objlib@sta/src_common_Log.cpp.o"
+  },
+  {
+    "directory": "/mnt/c/Users/alber/adaptive-language-controller/old_controller/third_party/rubberband_rt/rubberband/build",
+    "command": "c++ -Irubberband_objlib@sta -I. -I.. -I../rubberband -I../src -fdiagnostics-color=always -pipe -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wnon-virtual-dtor -Wextra -Wpedantic -std=c++11 -O3 -fPIC -pthread -DUSE_BUILTIN_FFT -DUSE_BQRESAMPLER -DNO_THREAD_CHECKS -DNO_TIMING -DNDEBUG -DUSE_PTHREADS -DHAVE_POSIX_MEMALIGN -MD -MQ 'rubberband_objlib@sta/src_common_Profiler.cpp.o' -MF 'rubberband_objlib@sta/src_common_Profiler.cpp.o.d' -o 'rubberband_objlib@sta/src_common_Profiler.cpp.o' -c ../src/common/Profiler.cpp",
+    "file": "../src/common/Profiler.cpp",
+    "output": "rubberband_objlib@sta/src_common_Profiler.cpp.o"
+  },
+  {
+    "directory": "/mnt/c/Users/alber/adaptive-language-controller/old_controller/third_party/rubberband_rt/rubberband/build",
+    "command": "c++ -Irubberband_objlib@sta -I. -I.. -I../rubberband -I../src -fdiagnostics-color=always -pipe -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wnon-virtual-dtor -Wextra -Wpedantic -std=c++11 -O3 -fPIC -pthread -DUSE_BUILTIN_FFT -DUSE_BQRESAMPLER -DNO_THREAD_CHECKS -DNO_TIMING -DNDEBUG -DUSE_PTHREADS -DHAVE_POSIX_MEMALIGN -MD -MQ 'rubberband_objlib@sta/src_common_Resampler.cpp.o' -MF 'rubberband_objlib@sta/src_common_Resampler.cpp.o.d' -o 'rubberband_objlib@sta/src_common_Resampler.cpp.o' -c ../src/common/Resampler.cpp",
+    "file": "../src/common/Resampler.cpp",
+    "output": "rubberband_objlib@sta/src_common_Resampler.cpp.o"
+  },
+  {
+    "directory": "/mnt/c/Users/alber/adaptive-language-controller/old_controller/third_party/rubberband_rt/rubberband/build",
+    "command": "c++ -Irubberband_objlib@sta -I. -I.. -I../rubberband -I../src -fdiagnostics-color=always -pipe -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wnon-virtual-dtor -Wextra -Wpedantic -std=c++11 -O3 -fPIC -pthread -DUSE_BUILTIN_FFT -DUSE_BQRESAMPLER -DNO_THREAD_CHECKS -DNO_TIMING -DNDEBUG -DUSE_PTHREADS -DHAVE_POSIX_MEMALIGN -MD -MQ 'rubberband_objlib@sta/src_common_StretchCalculator.cpp.o' -MF 'rubberband_objlib@sta/src_common_StretchCalculator.cpp.o.d' -o 'rubberband_objlib@sta/src_common_StretchCalculator.cpp.o' -c ../src/common/StretchCalculator.cpp",
+    "file": "../src/common/StretchCalculator.cpp",
+    "output": "rubberband_objlib@sta/src_common_StretchCalculator.cpp.o"
+  },
+  {
+    "directory": "/mnt/c/Users/alber/adaptive-language-controller/old_controller/third_party/rubberband_rt/rubberband/build",
+    "command": "c++ -Irubberband_objlib@sta -I. -I.. -I../rubberband -I../src -fdiagnostics-color=always -pipe -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wnon-virtual-dtor -Wextra -Wpedantic -std=c++11 -O3 -fPIC -pthread -DUSE_BUILTIN_FFT -DUSE_BQRESAMPLER -DNO_THREAD_CHECKS -DNO_TIMING -DNDEBUG -DUSE_PTHREADS -DHAVE_POSIX_MEMALIGN -MD -MQ 'rubberband_objlib@sta/src_common_sysutils.cpp.o' -MF 'rubberband_objlib@sta/src_common_sysutils.cpp.o.d' -o 'rubberband_objlib@sta/src_common_sysutils.cpp.o' -c ../src/common/sysutils.cpp",
+    "file": "../src/common/sysutils.cpp",
+    "output": "rubberband_objlib@sta/src_common_sysutils.cpp.o"
+  },
+  {
+    "directory": "/mnt/c/Users/alber/adaptive-language-controller/old_controller/third_party/rubberband_rt/rubberband/build",
+    "command": "c++ -Irubberband_objlib@sta -I. -I.. -I../rubberband -I../src -fdiagnostics-color=always -pipe -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wnon-virtual-dtor -Wextra -Wpedantic -std=c++11 -O3 -fPIC -pthread -DUSE_BUILTIN_FFT -DUSE_BQRESAMPLER -DNO_THREAD_CHECKS -DNO_TIMING -DNDEBUG -DUSE_PTHREADS -DHAVE_POSIX_MEMALIGN -MD -MQ 'rubberband_objlib@sta/src_common_mathmisc.cpp.o' -MF 'rubberband_objlib@sta/src_common_mathmisc.cpp.o.d' -o 'rubberband_objlib@sta/src_common_mathmisc.cpp.o' -c ../src/common/mathmisc.cpp",
+    "file": "../src/common/mathmisc.cpp",
+    "output": "rubberband_objlib@sta/src_common_mathmisc.cpp.o"
+  },
+  {
+    "directory": "/mnt/c/Users/alber/adaptive-language-controller/old_controller/third_party/rubberband_rt/rubberband/build",
+    "command": "c++ -Irubberband_objlib@sta -I. -I.. -I../rubberband -I../src -fdiagnostics-color=always -pipe -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wnon-virtual-dtor -Wextra -Wpedantic -std=c++11 -O3 -fPIC -pthread -DUSE_BUILTIN_FFT -DUSE_BQRESAMPLER -DNO_THREAD_CHECKS -DNO_TIMING -DNDEBUG -DUSE_PTHREADS -DHAVE_POSIX_MEMALIGN -MD -MQ 'rubberband_objlib@sta/src_common_Thread.cpp.o' -MF 'rubberband_objlib@sta/src_common_Thread.cpp.o.d' -o 'rubberband_objlib@sta/src_common_Thread.cpp.o' -c ../src/common/Thread.cpp",
+    "file": "../src/common/Thread.cpp",
+    "output": "rubberband_objlib@sta/src_common_Thread.cpp.o"
+  },
+  {
+    "directory": "/mnt/c/Users/alber/adaptive-language-controller/old_controller/third_party/rubberband_rt/rubberband/build",
+    "command": "c++ -Irubberband_objlib@sta -I. -I.. -I../rubberband -I../src -fdiagnostics-color=always -pipe -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wnon-virtual-dtor -Wextra -Wpedantic -std=c++11 -O3 -fPIC -pthread -DUSE_BUILTIN_FFT -DUSE_BQRESAMPLER -DNO_THREAD_CHECKS -DNO_TIMING -DNDEBUG -DUSE_PTHREADS -DHAVE_POSIX_MEMALIGN -MD -MQ 'rubberband_objlib@sta/src_finer_R3Stretcher.cpp.o' -MF 'rubberband_objlib@sta/src_finer_R3Stretcher.cpp.o.d' -o 'rubberband_objlib@sta/src_finer_R3Stretcher.cpp.o' -c ../src/finer/R3Stretcher.cpp",
+    "file": "../src/finer/R3Stretcher.cpp",
+    "output": "rubberband_objlib@sta/src_finer_R3Stretcher.cpp.o"
+  },
+  {
+    "directory": "/mnt/c/Users/alber/adaptive-language-controller/old_controller/third_party/rubberband_rt/rubberband/build",
+    "command": "c++ -Irubberband_objlib@sta -I. -I.. -I../rubberband -I../src -fdiagnostics-color=always -pipe -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wnon-virtual-dtor -Wextra -Wpedantic -std=c++11 -O3 -fPIC -pthread -DUSE_BUILTIN_FFT -DUSE_BQRESAMPLER -DNO_THREAD_CHECKS -DNO_TIMING -DNDEBUG -DUSE_PTHREADS -DHAVE_POSIX_MEMALIGN -MD -MQ 'rubberband_objlib@sta/src_common_BQResampler.cpp.o' -MF 'rubberband_objlib@sta/src_common_BQResampler.cpp.o.d' -o 'rubberband_objlib@sta/src_common_BQResampler.cpp.o' -c ../src/common/BQResampler.cpp",
+    "file": "../src/common/BQResampler.cpp",
+    "output": "rubberband_objlib@sta/src_common_BQResampler.cpp.o"
+  },
+  {
+    "directory": "/mnt/c/Users/alber/adaptive-language-controller/old_controller/third_party/rubberband_rt/rubberband/build",
+    "command": "c++ -Irubberband@exe -I. -I.. -I../rubberband -I../src -fdiagnostics-color=always -pipe -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wnon-virtual-dtor -Wextra -Wpedantic -std=c++11 -O3 -pthread -DUSE_BUILTIN_FFT -DUSE_BQRESAMPLER -DNO_THREAD_CHECKS -DNO_TIMING -DNDEBUG -DUSE_PTHREADS -DHAVE_POSIX_MEMALIGN -MD -MQ 'rubberband@exe/main_main.cpp.o' -MF 'rubberband@exe/main_main.cpp.o.d' -o 'rubberband@exe/main_main.cpp.o' -c ../main/main.cpp",
+    "file": "../main/main.cpp",
+    "output": "rubberband@exe/main_main.cpp.o"
+  },
+  {
+    "directory": "/mnt/c/Users/alber/adaptive-language-controller/old_controller/third_party/rubberband_rt/rubberband/build",
+    "command": "c++ -Irubberband-r3@exe -I. -I.. -I../rubberband -I../src -fdiagnostics-color=always -pipe -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wnon-virtual-dtor -Wextra -Wpedantic -std=c++11 -O3 -pthread -DUSE_BUILTIN_FFT -DUSE_BQRESAMPLER -DNO_THREAD_CHECKS -DNO_TIMING -DNDEBUG -DUSE_PTHREADS -DHAVE_POSIX_MEMALIGN -MD -MQ 'rubberband-r3@exe/main_main.cpp.o' -MF 'rubberband-r3@exe/main_main.cpp.o.d' -o 'rubberband-r3@exe/main_main.cpp.o' -c ../main/main.cpp",
+    "file": "../main/main.cpp",
+    "output": "rubberband-r3@exe/main_main.cpp.o"
+  }
+]

@@ -1,0 +1,373 @@
+Build started at 2024-01-31T17:03:17.929847
+Main binary: /usr/bin/python3
+Build Options: 
+Python system: Linux
+The Meson build system
+Version: 0.53.2
+Source dir: /mnt/c/Users/alber/adaptive-language-controller/old_controller/third_party/rubberband_rt/rubberband
+Build dir: /mnt/c/Users/alber/adaptive-language-controller/old_controller/third_party/rubberband_rt/rubberband/build
+Build type: native build
+Project name: Rubber Band Library
+Project version: 3.2.1
+No CFLAGS in the environment, not changing global flags.
+No LDFLAGS in the environment, not changing global flags.
+No CPPFLAGS in the environment, not changing global flags.
+Sanity testing C compiler: cc
+Is cross compiler: False.
+Sanity check compiler command line: cc /mnt/c/Users/alber/adaptive-language-controller/old_controller/third_party/rubberband_rt/rubberband/build/meson-private/sanitycheckc.c -o /mnt/c/Users/alber/adaptive-language-controller/old_controller/third_party/rubberband_rt/rubberband/build/meson-private/sanitycheckc.exe -pipe -D_FILE_OFFSET_BITS=64
+Sanity check compile stdout:
+
+-----
+Sanity check compile stderr:
+
+-----
+Running test binary command: /mnt/c/Users/alber/adaptive-language-controller/old_controller/third_party/rubberband_rt/rubberband/build/meson-private/sanitycheckc.exe
+C compiler for the build machine: cc (gcc 9.4.0 "cc (Ubuntu 9.4.0-1ubuntu1~20.04.2) 9.4.0")
+C linker for the build machine: cc ld.bfd 2.34
+No CXXFLAGS in the environment, not changing global flags.
+No LDFLAGS in the environment, not changing global flags.
+No CPPFLAGS in the environment, not changing global flags.
+Sanity testing C++ compiler: c++
+Is cross compiler: False.
+Sanity check compiler command line: c++ /mnt/c/Users/alber/adaptive-language-controller/old_controller/third_party/rubberband_rt/rubberband/build/meson-private/sanitycheckcpp.cc -o /mnt/c/Users/alber/adaptive-language-controller/old_controller/third_party/rubberband_rt/rubberband/build/meson-private/sanitycheckcpp.exe -pipe -D_FILE_OFFSET_BITS=64
+Sanity check compile stdout:
+
+-----
+Sanity check compile stderr:
+
+-----
+Running test binary command: /mnt/c/Users/alber/adaptive-language-controller/old_controller/third_party/rubberband_rt/rubberband/build/meson-private/sanitycheckcpp.exe
+C++ compiler for the build machine: c++ (gcc 9.4.0 "c++ (Ubuntu 9.4.0-1ubuntu1~20.04.2) 9.4.0")
+C++ linker for the build machine: c++ ld.bfd 2.34
+No CFLAGS in the environment, not changing global flags.
+No LDFLAGS in the environment, not changing global flags.
+No CPPFLAGS in the environment, not changing global flags.
+Sanity testing C compiler: cc
+Is cross compiler: False.
+Sanity check compiler command line: cc /mnt/c/Users/alber/adaptive-language-controller/old_controller/third_party/rubberband_rt/rubberband/build/meson-private/sanitycheckc.c -o /mnt/c/Users/alber/adaptive-language-controller/old_controller/third_party/rubberband_rt/rubberband/build/meson-private/sanitycheckc.exe -pipe -D_FILE_OFFSET_BITS=64
+Sanity check compile stdout:
+
+-----
+Sanity check compile stderr:
+
+-----
+Running test binary command: /mnt/c/Users/alber/adaptive-language-controller/old_controller/third_party/rubberband_rt/rubberband/build/meson-private/sanitycheckc.exe
+C compiler for the host machine: cc (gcc 9.4.0 "cc (Ubuntu 9.4.0-1ubuntu1~20.04.2) 9.4.0")
+C linker for the host machine: cc ld.bfd 2.34
+No CXXFLAGS in the environment, not changing global flags.
+No LDFLAGS in the environment, not changing global flags.
+No CPPFLAGS in the environment, not changing global flags.
+Sanity testing C++ compiler: c++
+Is cross compiler: False.
+Sanity check compiler command line: c++ /mnt/c/Users/alber/adaptive-language-controller/old_controller/third_party/rubberband_rt/rubberband/build/meson-private/sanitycheckcpp.cc -o /mnt/c/Users/alber/adaptive-language-controller/old_controller/third_party/rubberband_rt/rubberband/build/meson-private/sanitycheckcpp.exe -pipe -D_FILE_OFFSET_BITS=64
+Sanity check compile stdout:
+
+-----
+Sanity check compile stderr:
+
+-----
+Running test binary command: /mnt/c/Users/alber/adaptive-language-controller/old_controller/third_party/rubberband_rt/rubberband/build/meson-private/sanitycheckcpp.exe
+C++ compiler for the host machine: c++ (gcc 9.4.0 "c++ (Ubuntu 9.4.0-1ubuntu1~20.04.2) 9.4.0")
+C++ linker for the host machine: c++ ld.bfd 2.34
+Build machine cpu family: x86_64
+Build machine cpu: x86_64
+Host machine cpu family: x86_64
+Host machine cpu: x86_64
+Target machine cpu family: x86_64
+Target machine cpu: x86_64
+Pkg-config binary for MachineChoice.HOST is not cached.
+Pkg-config binary missing from cross or native file, or env var undefined.
+Trying a default pkg-config fallback at pkg-config
+Trying pkg-config binary pkg-config for machine MachineChoice.HOST at ['/usr/bin/pkg-config']
+Found pkg-config: /usr/bin/pkg-config (0.29.1)
+Determining dependency 'fftw3' with pkg-config executable '/usr/bin/pkg-config'
+PKG_CONFIG_PATH: 
+Called `/usr/bin/pkg-config --modversion fftw3` -> 1
+
+CMake binary for MachineChoice.HOST is not cached
+CMake binary missing from cross or native file, or env var undefined.
+Trying a default CMake fallback at cmake
+Trying CMake binary cmake for machine MachineChoice.HOST at [None]
+Did not find CMake 'cmake'
+Found CMake: NO
+No CMake binary for machine MachineChoice.HOST not found. Giving up.
+Run-time dependency fftw3 found: NO (tried pkgconfig and cmake)
+Pkg-config binary for MachineChoice.HOST is cached.
+Determining dependency 'sleef' with pkg-config executable '/usr/bin/pkg-config'
+PKG_CONFIG_PATH: 
+Called `/usr/bin/pkg-config --modversion sleef` -> 1
+
+CMake binary for MachineChoice.HOST is cached as not found
+No CMake binary for machine MachineChoice.HOST not found. Giving up.
+Run-time dependency sleef found: NO (tried pkgconfig and cmake)
+Pkg-config binary for MachineChoice.HOST is cached.
+Determining dependency 'sleefdft' with pkg-config executable '/usr/bin/pkg-config'
+PKG_CONFIG_PATH: 
+Called `/usr/bin/pkg-config --modversion sleefdft` -> 1
+
+CMake binary for MachineChoice.HOST is cached as not found
+No CMake binary for machine MachineChoice.HOST not found. Giving up.
+Run-time dependency sleefdft found: NO (tried pkgconfig and cmake)
+Pkg-config binary for MachineChoice.HOST is cached.
+Determining dependency 'samplerate' with pkg-config executable '/usr/bin/pkg-config'
+PKG_CONFIG_PATH: 
+Called `/usr/bin/pkg-config --modversion samplerate` -> 1
+
+CMake binary for MachineChoice.HOST is cached as not found
+No CMake binary for machine MachineChoice.HOST not found. Giving up.
+Run-time dependency samplerate found: NO (tried pkgconfig and cmake)
+Pkg-config binary for MachineChoice.HOST is cached.
+Determining dependency 'speexdsp' with pkg-config executable '/usr/bin/pkg-config'
+PKG_CONFIG_PATH: 
+Called `/usr/bin/pkg-config --modversion speexdsp` -> 1
+
+CMake binary for MachineChoice.HOST is cached as not found
+No CMake binary for machine MachineChoice.HOST not found. Giving up.
+Run-time dependency speexdsp found: NO (tried pkgconfig and cmake)
+Pkg-config binary for MachineChoice.HOST is cached.
+Determining dependency 'sndfile' with pkg-config executable '/usr/bin/pkg-config'
+PKG_CONFIG_PATH: 
+Called `/usr/bin/pkg-config --modversion sndfile` -> 0
+1.0.28
+PKG_CONFIG_PATH: 
+Called `/usr/bin/pkg-config --cflags sndfile` -> 0
+
+PKG_CONFIG_PATH: 
+Called `/usr/bin/pkg-config sndfile --libs` -> 0
+-L/usr/lib/x86_64-linux-gnu -lsndfile
+PKG_CONFIG_PATH: 
+Called `/usr/bin/pkg-config sndfile --libs` -> 0
+-lsndfile
+Running compile:
+Working directory:  /mnt/c/Users/alber/adaptive-language-controller/old_controller/third_party/rubberband_rt/rubberband/build/meson-private/tmpt6u91wrf
+Command line:  c++ /mnt/c/Users/alber/adaptive-language-controller/old_controller/third_party/rubberband_rt/rubberband/build/meson-private/tmpt6u91wrf/testfile.cpp -o /mnt/c/Users/alber/adaptive-language-controller/old_controller/third_party/rubberband_rt/rubberband/build/meson-private/tmpt6u91wrf/output.exe -pipe -D_FILE_OFFSET_BITS=64 -O0 -fpermissive 
+
+Code:
+ #include<stdio.h>
+        
+        int main(void) {
+            printf("%ld\n", (long)(sizeof(void *)));
+            return 0;
+        };
+Compiler stdout:
+ 
+Compiler stderr:
+ 
+Program stdout:
+
+8
+
+Program stderr:
+
+
+Running compile:
+Working directory:  /mnt/c/Users/alber/adaptive-language-controller/old_controller/third_party/rubberband_rt/rubberband/build/meson-private/tmp4a4o8ju0
+Command line:  c++ /mnt/c/Users/alber/adaptive-language-controller/old_controller/third_party/rubberband_rt/rubberband/build/meson-private/tmp4a4o8ju0/testfile.cpp -o /mnt/c/Users/alber/adaptive-language-controller/old_controller/third_party/rubberband_rt/rubberband/build/meson-private/tmp4a4o8ju0/output.obj -pipe -c -D_FILE_OFFSET_BITS=64 -O0 -fpermissive --print-search-dirs 
+
+Code:
+ 
+Compiler stdout:
+ install: /usr/lib/gcc/x86_64-linux-gnu/9/
+programs: =/usr/lib/gcc/x86_64-linux-gnu/9/:/usr/lib/gcc/x86_64-linux-gnu/9/:/usr/lib/gcc/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/9/:/usr/lib/gcc/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/9/../../../../x86_64-linux-gnu/bin/x86_64-linux-gnu/9/:/usr/lib/gcc/x86_64-linux-gnu/9/../../../../x86_64-linux-gnu/bin/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/9/../../../../x86_64-linux-gnu/bin/
+libraries: =/usr/lib/gcc/x86_64-linux-gnu/9/:/usr/lib/gcc/x86_64-linux-gnu/9/../../../../x86_64-linux-gnu/lib/x86_64-linux-gnu/9/:/usr/lib/gcc/x86_64-linux-gnu/9/../../../../x86_64-linux-gnu/lib/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/9/../../../../x86_64-linux-gnu/lib/../lib/:/usr/lib/gcc/x86_64-linux-gnu/9/../../../x86_64-linux-gnu/9/:/usr/lib/gcc/x86_64-linux-gnu/9/../../../x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/9/../../../../lib/:/lib/x86_64-linux-gnu/9/:/lib/x86_64-linux-gnu/:/lib/../lib/:/usr/lib/x86_64-linux-gnu/9/:/usr/lib/x86_64-linux-gnu/:/usr/lib/../lib/:/usr/lib/gcc/x86_64-linux-gnu/9/../../../../x86_64-linux-gnu/lib/:/usr/lib/gcc/x86_64-linux-gnu/9/../../../:/lib/:/usr/lib/
+
+Compiler stderr:
+ 
+Run-time dependency sndfile found: YES 1.0.28
+Pkg-config binary for MachineChoice.HOST is cached.
+Determining dependency 'vamp-sdk' with pkg-config executable '/usr/bin/pkg-config'
+PKG_CONFIG_PATH: 
+Called `/usr/bin/pkg-config --modversion vamp-sdk` -> 1
+
+CMake binary for MachineChoice.HOST is cached as not found
+No CMake binary for machine MachineChoice.HOST not found. Giving up.
+Run-time dependency vamp-sdk found: NO (tried pkgconfig and cmake)
+Boost library root dir is None
+Boost include directory is None
+Running compile:
+Working directory:  /mnt/c/Users/alber/adaptive-language-controller/old_controller/third_party/rubberband_rt/rubberband/build/meson-private/tmpatxw2t7v
+Command line:  c++ /mnt/c/Users/alber/adaptive-language-controller/old_controller/third_party/rubberband_rt/rubberband/build/meson-private/tmpatxw2t7v/testfile.cpp -pipe -E -P -D_FILE_OFFSET_BITS=64 -P -O0 -fpermissive 
+
+Code:
+ 
+        #include <boost/version.hpp>
+        #ifndef BOOST_LIB_VERSION
+        # define BOOST_LIB_VERSION
+        #endif
+        "MESON_GET_DEFINE_DELIMITER"
+BOOST_LIB_VERSION
+Compiler stdout:
+ 
+Compiler stderr:
+ /mnt/c/Users/alber/adaptive-language-controller/old_controller/third_party/rubberband_rt/rubberband/build/meson-private/tmpatxw2t7v/testfile.cpp:2:18: fatal error: boost/version.hpp: No such file or directory
+    2 |         #include <boost/version.hpp>
+      |                  ^~~~~~~~~~~~~~~~~~~
+compilation terminated.
+
+Run-time dependency Boost (unit_test_framework) found: NO 
+Run-time dependency threads found: YES
+Running compile:
+Working directory:  /tmp/tmp5o8xdkxu
+Command line:  c++ /tmp/tmp5o8xdkxu/testfile.cpp -o /tmp/tmp5o8xdkxu/output.obj -pipe -D_FILE_OFFSET_BITS=64 -c -std=c++11 
+
+Code:
+ int i = static_cast<int>(0);
+Compiler stdout:
+ 
+Compiler stderr:
+ 
+Compiler accepts -std=c++11: YES
+Running compile:
+Working directory:  /mnt/c/Users/alber/adaptive-language-controller/old_controller/third_party/rubberband_rt/rubberband/build/meson-private/tmpde8jpeet
+Command line:  c++ /mnt/c/Users/alber/adaptive-language-controller/old_controller/third_party/rubberband_rt/rubberband/build/meson-private/tmpde8jpeet/testfile.cpp -pipe -E -P -D_FILE_OFFSET_BITS=64 -P -O0 -fpermissive -std=c++11 
+
+Code:
+ 
+        #ifdef __has_include
+         #if !__has_include("ladspa.h")
+          #error "Header 'ladspa.h' could not be found"
+         #endif
+        #else
+         #include <ladspa.h>
+        #endif
+Compiler stdout:
+ 
+Compiler stderr:
+ /mnt/c/Users/alber/adaptive-language-controller/old_controller/third_party/rubberband_rt/rubberband/build/meson-private/tmpde8jpeet/testfile.cpp:4:12: error: #error "Header 'ladspa.h' could not be found"
+    4 |           #error "Header 'ladspa.h' could not be found"
+      |            ^~~~~
+
+Has header "ladspa.h" : NO 
+Running compile:
+Working directory:  /mnt/c/Users/alber/adaptive-language-controller/old_controller/third_party/rubberband_rt/rubberband/build/meson-private/tmphu98fc9a
+Command line:  c++ /mnt/c/Users/alber/adaptive-language-controller/old_controller/third_party/rubberband_rt/rubberband/build/meson-private/tmphu98fc9a/testfile.cpp -pipe -E -P -D_FILE_OFFSET_BITS=64 -P -O0 -fpermissive -std=c++11 
+
+Code:
+ 
+        #ifdef __has_include
+         #if !__has_include("lv2.h")
+          #error "Header 'lv2.h' could not be found"
+         #endif
+        #else
+         #include <lv2.h>
+        #endif
+Compiler stdout:
+ 
+Compiler stderr:
+ /mnt/c/Users/alber/adaptive-language-controller/old_controller/third_party/rubberband_rt/rubberband/build/meson-private/tmphu98fc9a/testfile.cpp:4:12: error: #error "Header 'lv2.h' could not be found"
+    4 |           #error "Header 'lv2.h' could not be found"
+      |            ^~~~~
+
+Has header "lv2.h" : NO 
+Running compile:
+Working directory:  /mnt/c/Users/alber/adaptive-language-controller/old_controller/third_party/rubberband_rt/rubberband/build/meson-private/tmpjgq5jo0y
+Command line:  c++ /mnt/c/Users/alber/adaptive-language-controller/old_controller/third_party/rubberband_rt/rubberband/build/meson-private/tmpjgq5jo0y/testfile.cpp -o /mnt/c/Users/alber/adaptive-language-controller/old_controller/third_party/rubberband_rt/rubberband/build/meson-private/tmpjgq5jo0y/output.exe -pipe -D_FILE_OFFSET_BITS=64 -O0 -fpermissive -std=c++11 -Wl,--start-group -lm -Wl,--end-group 
+
+Code:
+ #define _GNU_SOURCE
+#include <math.h>
+#include <limits.h>
+
+        #if defined __stub_sincos || defined __stub___sincos
+        fail fail fail this function is not going to work
+        #endif
+        
+int main(void) {
+            void *a = (void*) &sincos;
+            long b = (long) a;
+            return (int) b;
+        }
+Compiler stdout:
+ 
+Compiler stderr:
+ /mnt/c/Users/alber/adaptive-language-controller/old_controller/third_party/rubberband_rt/rubberband/build/meson-private/tmpjgq5jo0y/testfile.cpp:1: warning: "_GNU_SOURCE" redefined
+    1 | #define _GNU_SOURCE
+      | 
+<command-line>: note: this is the location of the previous definition
+
+Checking for function "sincos" : YES 
+Compiler for language java for the build machine not found.
+Compiler for language java for the host machine not found.
+Message: For FFT: using built-in implementation
+Message: For resampler: using built-in implementation
+Running compile:
+Working directory:  /mnt/c/Users/alber/adaptive-language-controller/old_controller/third_party/rubberband_rt/rubberband/build/meson-private/tmp8b9b7l2y
+Command line:  c++ /mnt/c/Users/alber/adaptive-language-controller/old_controller/third_party/rubberband_rt/rubberband/build/meson-private/tmp8b9b7l2y/testfile.cpp -pipe -E -P -D_FILE_OFFSET_BITS=64 -P -O0 -fpermissive -std=c++11 
+
+Code:
+ 
+        #ifdef __has_include
+         #if !__has_include("vamp-sdk.h")
+          #error "Header 'vamp-sdk.h' could not be found"
+         #endif
+        #else
+         #include <vamp-sdk.h>
+        #endif
+Compiler stdout:
+ 
+Compiler stderr:
+ /mnt/c/Users/alber/adaptive-language-controller/old_controller/third_party/rubberband_rt/rubberband/build/meson-private/tmp8b9b7l2y/testfile.cpp:4:12: error: #error "Header 'vamp-sdk.h' could not be found"
+    4 |           #error "Header 'vamp-sdk.h' could not be found"
+      |            ^~~~~
+
+Has header "vamp-sdk.h" : NO 
+Using cached compile:
+Cached command line:  c++ /mnt/c/Users/alber/adaptive-language-controller/old_controller/third_party/rubberband_rt/rubberband/build/meson-private/tmp8b9b7l2y/testfile.cpp -pipe -E -P -D_FILE_OFFSET_BITS=64 -P -O0 -fpermissive -std=c++11 
+
+Code:
+ 
+        #ifdef __has_include
+         #if !__has_include("vamp-sdk.h")
+          #error "Header 'vamp-sdk.h' could not be found"
+         #endif
+        #else
+         #include <vamp-sdk.h>
+        #endif
+Cached compiler stdout:
+ 
+Cached compiler stderr:
+ /mnt/c/Users/alber/adaptive-language-controller/old_controller/third_party/rubberband_rt/rubberband/build/meson-private/tmp8b9b7l2y/testfile.cpp:4:12: error: #error "Header 'vamp-sdk.h' could not be found"
+    4 |           #error "Header 'vamp-sdk.h' could not be found"
+      |            ^~~~~
+
+Has header "vamp-sdk.h" : NO (cached)
+Message: Will build Rubber Band Library static library
+Message: Will build Rubber Band Library dynamic library
+Message: Not building Java Native Interface: Java compiler or archiver missing
+Message: Not building LADSPA plugin: ladspa.h header not found
+Message: Not building LV2 plugin: lv2.h header not found
+Message: Not building Vamp plugin: Vamp dependency not found
+Message: Will build command-line utilities
+Message: Not building unit tests: boost_unit_test_framework dependency not found
+Build targets in project: 5
+
+Rubber Band Library 3.2.1
+
+  Directories
+                       prefix: /usr/local
+                       bindir: bin
+                       libdir: lib/x86_64-linux-gnu
+                      datadir: share
+
+  Configuration
+                          FFT: Built-in
+                    Resampler: Built-in
+                   Build type: Release
+                 Architecture: x86_64
+
+  Build targets
+               Static library: YES
+                               Name: rubberband
+              Dynamic library: YES
+                               Name: rubberband
+                  JNI library: NO
+                LADSPA plugin: NO
+                   LV2 plugin: NO
+                  Vamp plugin: NO
+    Command-line utility (R2): YES
+                               Name: rubberband
+    Command-line utility (R3): YES
+                               Name: rubberband-r3
+                   Unit tests: NO
+
+Found ninja-1.10.0 at /usr/bin/ninja

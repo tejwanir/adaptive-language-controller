@@ -1,0 +1,3 @@
+[distutils.commands]
+deepclean = ext.deepClean:DeepClean
+

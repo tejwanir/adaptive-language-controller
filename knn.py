@@ -249,6 +249,17 @@ def test_knn(session_id: int):
     base_path = get_session_base_path_1(session_id)
     cap = cv2.VideoCapture(str(base_path / "cut_video.avi"))
     interval = int(1000 / cap.get(cv2.CAP_PROP_FPS))
+    fourcc = cv2.VideoWriter_fourcc(*"avc1")
+    video_writer = cv2.VideoWriter(
+        "./knn_output.mp4",
+        fourcc,
+        cap.get(cv2.CAP_PROP_FPS),
+        # same resolution as input
+        (
+            int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)),
+            int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)),
+        ),
+    )
 
     with open("knn_db.json", "r") as f:
         db = json.load(f)
@@ -289,10 +300,14 @@ def test_knn(session_id: int):
             put_text(f"Duration: {item['duration']:.2f}s", base_y + scale * 80)
             put_text(f"Distance: {knn_d:.2f}", base_y + scale * 120)
 
+        video_writer.write(frame)
         cv2.imshow("Video", frame)
         to_wait = max(1, interval - int((time.time() - start) * 1000))
         if cv2.waitKey(to_wait) & 0xFF == 27:
             break
+    cap.release()
+    video_writer.release()
+    cv2.destroyAllWindows()
 
 
 if __name__ == "__main__":

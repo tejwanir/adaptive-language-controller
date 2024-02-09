@@ -1,0 +1,12 @@
+Change .color scripts to .jpg:
+a=1
+for i in $(ls *.color | sort -V); do
+  new=$(printf "image%05d.jpg" "$a") # This will create file names with five digits, padded with zeros
+  mv -- "$i" "$new"
+  let a=a+1
+done
+
+Compile photos into a video with FFMPEG:
+ffmpeg -framerate 30 -i image%05d.jpg -c:v libx264 -profile:v high -crf 20 -pix_fmt yuv420p output.mp4
+
+Run in Git Bash.

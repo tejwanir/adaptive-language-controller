@@ -12,8 +12,47 @@ from datetime import datetime
 import cv2
 import numpy as np
 import pyaudio
-from PyNuitrack import py_nuitrack
+#from PyNuitrack import py_nuitrack
 
+JOINT_NAMES = [
+    "Nose", "Neck", "ShoulderRight", "ElbowRight", "WristRight", "ShoulderLeft", "ElbowLeft", "WristLeft",
+    "HipRight", "KneeRight", "AnkleRight", "HipLeft", "KneeLeft", "AnkleLeft", "EyeRight", "EyeLeft",
+    "EarRight", "EarLeft", "FootLeft", "FootRight", "Pelvis", "Waist", "Chest", "BigToeLeft", "LittleToeLeft",
+    "HeelLeft", "BigToeRight", "LittleToeRight", "HeelRight", "TopSkull", "BackSkull", "Xiphoid",
+    "ClavicleLeft", "ClavicleRight", "Head"
+]
+
+JOINT_CONNECTIONS = [
+    ("Nose", "Neck"),
+    ("Neck", "ShoulderRight"),
+    ("ShoulderRight", "ElbowRight"),
+    ("ElbowRight", "WristRight"),
+    ("ShoulderRight", "HipRight"),
+    ("HipRight", "KneeRight"),
+    ("KneeRight", "AnkleRight"),
+    ("Neck", "ShoulderLeft"),
+    ("ShoulderLeft", "ElbowLeft"),
+    ("ElbowLeft", "WristLeft"),
+    ("ShoulderLeft", "HipLeft"),
+    ("HipLeft", "KneeLeft"),
+    ("KneeLeft", "AnkleLeft"),
+    ("Nose", "EyeRight"),
+    ("Nose", "EyeLeft"),
+    ("EyeRight", "EarRight"),
+    ("EyeLeft", "EarLeft"),
+    ("AnkleLeft", "FootLeft"),
+    ("AnkleRight", "FootRight"),
+    ("Waist", "Pelvis"),
+    ("Chest", "Pelvis"),
+    ("TopSkull", "BackSkull"),
+    ("Chest", "Xiphoid"),
+    ("Xiphoid", "Pelvis"),
+    ("ShoulderLeft", "ClavicleLeft"),
+    ("ShoulderRight", "ClavicleRight"),
+    ("Neck", "Head")
+]
+
+'''
 # fmt: off
 JOINT_NAMES = [
     "head", "neck", "torso", "waist",
@@ -47,6 +86,8 @@ JOINT_CONNECTIONS = [
     ("right_knee", "right_ankle"),
 ]
 # fmt: on
+'''
+
 
 
 def draw_skeleton(image, data) -> str:
@@ -134,25 +175,6 @@ def read_data(ser, writer):
         writer.writerow([time.time(), decoded_bytes])
 
 def main():
-    nuitrack = py_nuitrack.Nuitrack()
-    nuitrack.init()
-
-    # ---enable if you want to use face tracking---
-    nuitrack.set_config_value("CnnDetectionModule.ToUse", "true")
-
-    devices = nuitrack.get_device_list()
-    for i, dev in enumerate(devices):
-        if i == 0:
-            nuitrack.set_device(dev)
-            print("set device: ", dev.get_name(), dev.get_serial_number())
-            break
-
-    print(nuitrack.get_license())
-
-    nuitrack.create_modules()
-    nuitrack.run()
-
-
     session_name = "lab_session_8" #CHANGE SESSION NAME
 
 
@@ -170,7 +192,7 @@ def main():
     # Setup audio recording
     chunk = 1024  # Record in chunks of 1024 samples
     sample_format = pyaudio.paInt16  # 16 bits per sample
-    channels = 2
+    channels = 1
     fs = 44100  # Record at 44100 samples per second
     stream = pyaudio.PyAudio().open(
         format=sample_format,
@@ -194,8 +216,9 @@ def main():
     audio_thread = threading.Thread(target=record_audio)
     audio_thread.start()
 
+    
     # Open the serial port and CSV file
-    ser = serial.Serial('/dev/ttyACM0')
+    ser = serial.Serial("COM5")
     ser.flushInput()
 
     csv_file = open('./sessions/'+session_name+'/data.csv',mode='a')
@@ -219,17 +242,11 @@ def main():
         # proc = start_mp4_recording(video_filename)
         while True:
             key = cv2.waitKey(1)
-            nuitrack.update()
-            data = nuitrack.get_skeleton()
-            img_depth = nuitrack.get_depth_data()
-            img_color = nuitrack.get_color_data()
-            out.write(img_color)
             if img_depth.size:
                 cv2.normalize(img_depth, img_depth, 0, 255, cv2.NORM_MINMAX)
                 img_depth = np.array(
                     cv2.cvtColor(img_depth, cv2.COLOR_GRAY2RGB), dtype=np.uint8
                 )
-                json = draw_skeleton(img_depth, data)
                 cv2.imshow("Image", img_depth)
                 file.write(json + "\n")
             if key == 27:
@@ -242,7 +259,6 @@ def main():
     out.release()
     cv2.destroyAllWindows()
     print("Video saved")
-    nuitrack.release()
     print("Nuitrack tracking module released")
     ser.close()
     csv_file.close()

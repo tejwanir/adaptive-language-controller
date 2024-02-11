@@ -28,11 +28,11 @@ class Poses(TypedDict):
 
 def main():
 
-    session_name = "lab_session_7" # CHANGE SESSION NAME TO VISUALIZE
+    session_name = "lightbuzz_table_1" # CHANGE SESSION NAME TO VISUALIZE
 
     root_dir = Path() / "sessions" / session_name
     poses: List[Poses] = []
-    with open(root_dir / "cut_poses.jsonl", "r") as file:
+    with open(root_dir / "poses.jsonl", "r") as file:
         for line in file:
             poses.append(Poses(json.loads(line)))
     print(f"Loaded {len(poses)} poses")
@@ -41,14 +41,15 @@ def main():
     Added chunk below
     '''
 
+    '''
     # Update user_2's left hand to match user_1's right hand
     for pose in poses:
         user_1_skel = next((skel for skel in pose["skeletons"] if skel["user_id"] == 1), None)
         user_2_skel = next((skel for skel in pose["skeletons"] if skel["user_id"] == 2), None)
         if user_1_skel and user_2_skel:
-            if "right_hand" in user_1_skel and "left_hand" in user_2_skel:
-                user_2_skel["left_hand"]["real"] = user_1_skel["right_hand"]["real"]
-
+            if "WristRight" in user_1_skel and "WristLeft" in user_2_skel:
+                user_2_skel["WristLeft"]["pos3D"] = user_1_skel["WristRight"]["pos3D"]
+    '''
 
     # Store keypoints for each skeleton in each pose
     all_keypoints: List[List[np.ndarray]] = []
@@ -66,7 +67,7 @@ def main():
                 joint: Joint = skel[joint_name]
                 if joint["confidence"] <= 0.5:
                     continue
-                current_keypoints.append(joint["real"])
+                current_keypoints.append(joint["pos3D"])
             if len(current_keypoints) > 0:
                 pose_keypoints.append(np.array(current_keypoints))
         if pose_keypoints:
@@ -114,16 +115,16 @@ def main():
 
         for skeleton_index, skeleton in enumerate(all_keypoints[cur_idx]):
             for conn_line, (joint1, joint2) in zip(connection_lines[skeleton_index], JOINT_CONNECTIONS):
-
-                '''
-                Added a condition to remove wrist from joint names
-                '''
-
-                if("wrist" in joint1 or "wrist" in joint2):
-                    continue
                 try:
                     idx1 = get_joint_index(joint1)
                     idx2 = get_joint_index(joint2)
+                    if joint1 == "WristRight" or joint2 == "WristRight":
+                        conn_line.set_color('violet')
+                    elif joint1 == "WristLeft" or joint2 == "WristLeft":
+                        conn_line.set_color('blue')
+                    else:
+                        conn_line.set_color('green')
+                        conn_line.set_alpha(0.5)  # Set opacity to 0.5 for green lines
                     conn_line.set_data_3d(
                         [skeleton[idx1, 0], skeleton[idx2, 0]],
                         [skeleton[idx1, 2], skeleton[idx2, 2]],
@@ -135,7 +136,7 @@ def main():
 
         return dot_lines + [line for skeleton_lines in connection_lines for line in skeleton_lines]
 
-    interval = 50
+    interval = 33 #That way it runs at 1000/33=30 fps
     frames = int((timestamps[-1] - timestamps[0]) * 1000 / interval)
     ani = FuncAnimation(
         fig, update, frames=frames, init_func=init, blit=True, interval=interval

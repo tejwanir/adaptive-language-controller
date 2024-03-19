@@ -114,34 +114,40 @@ UserPose = dict[str, np.ndarray]
 UserPoses = dict[int, UserPose]
 
 
+def preprocess_frame(
+    frame: dict, confidence_threshold: float = 0.5
+) -> tuple[float, UserPoses]:
+    timestamp = frame["timestamp"]
+    skeletons = frame["skeletons"]
+    return (
+        timestamp,
+        {
+            skeleton["user_id"]: {
+                joint: np.array(joint_info["pos3D"])
+                for joint, joint_info in skeleton.items()
+                if joint != "user_id"
+                and joint != "confidence"
+                and joint_info["confidence"] >= confidence_threshold
+            }
+            for skeleton in skeletons
+        },
+    )
+
+
 def preprocess_poses(
     path: Path, confidence_threshold: float = 0.5
 ) -> Iterable[tuple[float, UserPoses]]:
     with open(path, "r") as f:
         for line in f.readlines():
             frame = json.loads(line)
-            timestamp = frame["timestamp"]
-            skeletons = frame["skeletons"]
-            yield (
-                timestamp,
-                {
-                    skeleton["user_id"]: {
-                        joint: np.array(joint_info["pos3D"])
-                        for joint, joint_info in skeleton.items()
-                        if joint != "user_id"
-                        and joint_info["confidence"] >= confidence_threshold
-                    }
-                    for skeleton in skeletons
-                },
-            )
+            yield preprocess_frame(frame, confidence_threshold)
 
 
 def plot_session(session: int):
     color_cycle = plt.rcParams["axes.prop_cycle"].by_key()["color"]
 
-    timestamps, all_poses = list(
-        zip(*preprocess_poses(get_session_base_path(session) / "poses.jsonl"))
-    )
+    path = get_session_base_path(session) / "poses.jsonl"
+    timestamps, all_poses = list(zip(*preprocess_poses(path)))
     timestamps: list[float]
     all_poses: list[UserPoses]
     pose_filter = PoseFilter()
@@ -149,10 +155,13 @@ def plot_session(session: int):
         pose_filter.filter_skeletons(timestamp, poses)
         for timestamp, poses in zip(timestamps, all_poses)
     ]
+    corrector = FrameCorrector(0)
+    all_poses = [corrector.filter_skeletons(poses) for poses in all_poses]
 
     max_user_id = max(
         user_id for user_poses in all_poses for user_id in user_poses.keys()
     )
+    # max_user_id = min(max_user_id, 1)
     user_joints: list[list[dict[str, np.ndarray]]] = []
     min_pos_3d = np.array([100] * 3)
     max_pos_3d = -min_pos_3d
@@ -161,7 +170,11 @@ def plot_session(session: int):
         for _ in range(max_user_id + 1):
             cur_user_joints.append({})
         for user_id, pose in user_poses.items():
+            if user_id > max_user_id:
+                continue
             for joint, pos in pose.items():
+                if np.any(np.isnan(pos)):
+                    continue
                 min_pos_3d = np.minimum(min_pos_3d, pos)
                 max_pos_3d = np.maximum(max_pos_3d, pos)
                 cur_user_joints[user_id][joint] = pos
@@ -207,14 +220,13 @@ def plot_session(session: int):
     legend_handles = []
     for user_id in range(max_user_id + 1):
         bones.append([])
+        color = color_cycle[user_id % len(color_cycle)]
         for _ in range(len(JOINT_CONNECTIONS)):
-            (artist,) = ax.plot([], [], [], color=color_cycle[user_id])
+            (artist,) = ax.plot([], [], [], color=color)
             bones[user_id].append(artist)
         depths.append(ax_depth.plot([], [], label=f"{user_id}")[0])
         n_joints.append(ax_n_joints.plot([], [], label=f"{user_id}")[0])
-        legend_handles.append(
-            Patch(color=color_cycle[user_id], label=f"User {user_id}")
-        )
+        legend_handles.append(Patch(color=color, label=f"User {user_id}"))
     ax.legend(handles=legend_handles)
     ax_depth.legend()
     ax_n_joints.legend()
@@ -282,6 +294,8 @@ class LowPassFilter(Generic[T]):
         Assumes FOH interpolation between the last timestamp and the current one.
         """
         delta_t = timestamp - self.last_timestamp
+        if delta_t < 1e-8:
+            return self.last_y
         delta_x = self.last_x - new_x
         e = np.exp(-delta_t * self.omega)
         new_y = (
@@ -348,6 +362,50 @@ class PoseFilter:
         return depth_corrected
 
 
+class FrameCorrector:
+    user_id: int
+    center: np.ndarray
+    rot: np.ndarray
+
+    def __init__(self, user_id: int):
+        self.user_id = user_id
+        self.center = np.array([0, 0, 0])
+        self.rot = np.eye(3)
+
+    def filter_skeletons(self, poses: UserPoses) -> UserPoses:
+        if not poses:
+            return poses
+        ref_user = poses.get(self.user_id, poses[next(iter(poses))])
+        try:
+            self.center = ref_user["Neck"]
+
+            shoulder_axis = ref_user["ShoulderLeft"] - ref_user["ShoulderRight"]
+            shoulder_axis /= np.linalg.norm(shoulder_axis)
+            spine_axis = ref_user["Pelvis"] - ref_user["Chest"]
+            spine_axis /= np.linalg.norm(spine_axis)
+            # Orthogonalize the shoulder axis
+            shoulder_axis -= np.dot(shoulder_axis, spine_axis) * spine_axis
+            shoulder_axis /= np.linalg.norm(shoulder_axis)
+            # Backwards
+            back_axis = np.cross(shoulder_axis, spine_axis)
+            ref_back_axis = ref_user["Head"] - ref_user["Nose"]
+            if np.dot(back_axis, ref_back_axis) < 0:
+                back_axis *= -1
+            # shoulder_axis will be the x-axis, spine_axis will be the y-axis,
+            # and back_axis will be the z-axis
+            self.rot = np.array([shoulder_axis, spine_axis, back_axis]).T
+            self.rot = np.linalg.inv(self.rot)
+        except KeyError:
+            pass
+        return {
+            user_id: {
+                joint: np.dot(self.rot, pos - self.center)
+                for joint, pos in user_poses.items()
+            }
+            for user_id, user_poses in poses.items()
+        }
+
+
 if __name__ == "__main__":
     # fit_perspective_parameters(False)
-    plot_session(0)
+    plot_session(4)

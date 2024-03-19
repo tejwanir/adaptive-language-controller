@@ -1,9 +1,19 @@
 import json
+import multiprocessing as mp
 import typing
 from pathlib import Path
 
 import numpy as np
 from tqdm import tqdm
+
+from filter_poses import (
+    FrameCorrector,
+    PoseFilter,
+    UserPose,
+    UserPoses,
+    preprocess_poses,
+)
+from lightbuzz_poses import collect_poses
 
 whisper_model = None
 punct_model = None
@@ -198,31 +208,26 @@ def debug_pose_data(session_id: int):
 
 
 def get_filtered_features(session_id: int, alpha: float = 0.7):
-    base_path = get_session_base_path_2(session_id)
-
-    with open(base_path / "cut_poses_error_fix.jsonl", "r") as f:
-        poses = [json.loads(line) for line in f]
-
-    timestamps = []
-    hand_coords = []
-    last_filtered = None
-    last_timestamp = None
-    for pose in poses:
-        skeletons = pose["skeletons"]
-        if len(skeletons) != 2:
-            continue
-        if skeletons[0]["left_hand"]["confidence"] < 0.5:
-            continue
-        right_hand = np.array(skeletons[0]["right_hand"]["real"])
-        if last_filtered is not None:
-            a = alpha ** (pose["timestamp"] - last_timestamp)
-            right_hand = a * last_filtered + (1 - a) * right_hand
-        hand_coords.append(right_hand)
-        timestamps.append(pose["timestamp"])
-        last_filtered = right_hand
-        last_timestamp = pose["timestamp"]
+    base_path = get_session_base_path_1(session_id)
+    timestamps, all_poses = list(zip(*preprocess_poses(base_path / "cut_poses.jsonl")))
     timestamps = np.array(timestamps)
-    hand_coords = np.array(hand_coords)
+    all_poses: list[UserPoses]
+    pose_filter = PoseFilter()
+    all_poses = [
+        pose_filter.filter_skeletons(timestamp, poses)
+        for timestamp, poses in zip(timestamps, all_poses)
+    ]
+    corrector = FrameCorrector(0)
+    all_poses = [corrector.filter_skeletons(poses) for poses in all_poses]
+
+    hand_coords = []
+    for poses in all_poses:
+        if len(poses) != 2:
+            continue
+        if "WristRight" not in poses[0]:
+            continue
+        right_hand = np.array(poses[0]["WristRight"])
+        hand_coords.append(right_hand)
     return timestamps - timestamps.min(), hand_coords
 
 
@@ -236,6 +241,9 @@ def adjust_lims(ax, coords):
     ax.set_zlim(z_min - (z_max - z_min) * fudge, z_max + (z_max - z_min) * fudge)
 
 
+KNN_INTERVAL = 1  # seconds
+
+
 def build_knn(session_ids: typing.Iterable[int], plot: bool = False):
     db = []
     for i in session_ids:
@@ -247,7 +255,7 @@ def build_knn(session_ids: typing.Iterable[int], plot: bool = False):
             start_time = phrase["start_time"]
             t_idx = np.searchsorted(timestamps, start_time, side="left")
             t_idx = min(t_idx, len(hand_coords) - 1)
-            s_idx = np.searchsorted(timestamps, start_time - 1, side="left")
+            s_idx = np.searchsorted(timestamps, start_time - KNN_INTERVAL, side="left")
             vec = hand_coords[t_idx] - hand_coords[s_idx]
             db.append(
                 {
@@ -419,15 +427,13 @@ def test_knn_with_polly(session_id: int):
     tts_player.stop()
 
 
-def test_admittance():
-    import multiprocessing as mp
-
+def run_admittance_trajectory():
     from admittance import admittance_loop
     from global_constants import slow_turn, slow_walk
     from paths import Movement
     from ur5 import gripper, rtde_c
 
-    movement = Movement([slow_turn, slow_walk, slow_turn])
+    movement = Movement([slow_turn, slow_walk, slow_turn, slow_walk, slow_turn])
     gripper.move_and_wait_for_pos(105, 255, 1)
     rtde_c.zeroFtSensor()
     init_pose = movement.start_pose()
@@ -436,12 +442,77 @@ def test_admittance():
     admittance_loop([movement], robot_info)
 
 
+def real_time_knn():
+    from scipy.spatial import KDTree
+
+    from sound import AsyncTTSPlayer
+
+    with open("knn_db.json", "r") as f:
+        db = json.load(f)
+        all_vecs = np.array([item["vec"] for item in db])
+        kd_tree = KDTree(all_vecs)
+
+    q: "mp.Queue[tuple[float, UserPoses]]" = mp.Queue()
+    proc_collect = mp.Process(target=collect_poses, args=(q,))
+    proc_collect.start()
+    proc_move = mp.Process(target=run_admittance_trajectory, args=())
+    proc_move.start()
+
+    all_timestamp_poses = []
+    idx_prev = 0
+    tts_player = AsyncTTSPlayer()
+    last_timestamp = 0
+    knn_check_interval = 1 / 10
+
+    while True:
+        timestamp, poses = q.get()
+        feature = lambda p: np.array(p[0]["WristLeft"])
+
+        try:
+            pos_now = feature(poses)
+        except KeyError:
+            continue
+
+        while (
+            idx_prev < len(all_timestamp_poses)
+            and all_timestamp_poses[idx_prev][0] < timestamp - KNN_INTERVAL
+        ):
+            idx_prev += 1
+        if (
+            idx_prev < len(all_timestamp_poses)
+            and timestamp - last_timestamp >= knn_check_interval
+        ):
+            last_timestamp = timestamp
+            pos_past = feature(all_timestamp_poses[idx_prev][1])
+            knn_feature = pos_now - pos_past
+            try:
+                knn_ds, knn_is = kd_tree.query(knn_feature, k=3)
+                for knn_d, knn_i in zip(knn_ds, knn_is):
+                    item = db[knn_i]
+                    print(f"  Phrase: {item['phrase']}")
+                    print(f"  Duration: {item['duration']:.2f}s")
+                    print(f"  Distance: {knn_d:.2f}")
+                print("=" * 100)
+                for knn_d, knn_i in zip(knn_ds, knn_is):
+                    item: str = db[knn_i]["phrase"]
+                    if item.lower() not in ["one", "two", "three", "1", "2", "3"]:
+                        tts_player.put_text_if_ready(db[knn_is[0]]["phrase"])
+                        break
+            except ValueError:
+                pass
+
+        all_timestamp_poses.append((timestamp, poses))
+    pass
+
+
 if __name__ == "__main__":
     # Build KNN db from sessions 1-6
-    debug_pose_data(0)
-    # build_knn(range(1, 7), plot=True)
+    # debug_pose_data(0)
+    # build_knn(range(0, 6), plot=True)
+    real_time_knn()
+    # run_admittance_trajectory()
     # Test KNN on session 0
     # test_knn(0)
     # test_polly()
     # test_knn_with_polly(0)
-    # test_admittance()
+    pass

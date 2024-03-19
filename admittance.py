@@ -2,9 +2,18 @@ import multiprocessing as mp
 import time
 
 import numpy as np
+import win32api
+import win32con
+import win32process
 
 from paths import Movement
 from ur5 import dt, rtde_c, rtde_r
+
+
+def _set_priority(priority):
+    pid = win32api.GetCurrentProcessId()
+    handle = win32api.OpenProcess(win32con.PROCESS_ALL_ACCESS, True, pid)
+    win32process.SetPriorityClass(handle, priority)
 
 
 def admittance_loop(
@@ -27,6 +36,9 @@ def admittance_loop(
     trans_inertia, rot_inertia, driving_force = movement.constants()
     end_pose = movement.end_pose()
     first_time = True
+
+    _set_priority(win32process.REALTIME_PRIORITY_CLASS)
+    print("Admittance Control Loop Started")
 
     while True:
         try:
@@ -78,12 +90,23 @@ def admittance_loop(
                 trans_inertia, rot_inertia, driving_force = movement.constants()
                 end_pose = movement.end_pose()
 
+            # DO NOT REMOVE THIS PRINT!!!
+            # DO NOT REMOVE THIS PRINT!!!
+            # DO NOT REMOVE THIS PRINT!!!
+            # There are weird things happening with Window's process scheduler
+            # and how Python interacts with it. If you remove this print
+            # statement, this process may starve for CPU time when other
+            # CPU-intensive processes are running. If speedL cannot be updated
+            # with the expected frequency, the robot could keep moving until
+            # it hits a singularity -- very bad.
+            print(t_start)
             rtde_c.waitPeriod(t_start)
         except BreakAdmittanceControl:
             break
         except KeyboardInterrupt:
             break
     rtde_c.speedL(np.zeros(6))
+    _set_priority(win32process.NORMAL_PRIORITY_CLASS)
 
 
 class BreakAdmittanceControl(RuntimeError):

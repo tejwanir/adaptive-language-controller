@@ -1,0 +1,4 @@
+*.dll
+*.pyd
+*.exp
+*.lib

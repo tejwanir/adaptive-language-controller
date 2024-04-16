@@ -6,13 +6,7 @@ from pathlib import Path
 import numpy as np
 from tqdm import tqdm
 
-from filter_poses import (
-    FrameCorrector,
-    PoseFilter,
-    UserPose,
-    UserPoses,
-    preprocess_poses,
-)
+from filter_poses import FrameCorrector, PoseFilter, UserPoses, preprocess_poses
 from lightbuzz_poses import collect_poses
 
 whisper_model = None
@@ -443,9 +437,16 @@ def run_admittance_trajectory():
 
 
 def real_time_knn():
+    import torch
     from scipy.spatial import KDTree
+    from transformers import AutoModelForCausalLM, AutoTokenizer
 
     from sound import AsyncTTSPlayer
+
+    device = "cuda"
+    model_id = "openai-community/gpt2"
+    model = AutoModelForCausalLM.from_pretrained(model_id).to(device)
+    tokenizer = AutoTokenizer.from_pretrained(model_id)
 
     with open("knn_db.json", "r") as f:
         db = json.load(f)
@@ -463,6 +464,20 @@ def real_time_knn():
     tts_player = AsyncTTSPlayer()
     last_timestamp = 0
     knn_check_interval = 1 / 10
+
+    def compute_nll(context: str, completion: str):
+        context = tokenizer(context, return_tensors="pt").to(device)
+        completion = tokenizer(completion, return_tensors="pt").to(device)
+        input_ids = torch.cat([context["input_ids"], completion["input_ids"]], dim=-1)
+        trg_len = completion["input_ids"].shape[-1]
+        target_ids = input_ids.clone()
+        target_ids[:, :-trg_len] = -100
+        with torch.no_grad():
+            outputs = model(input_ids, labels=target_ids)
+            loss = outputs.loss
+        return loss.item()
+
+    context = "therapy session: "
 
     while True:
         timestamp, poses = q.get()
@@ -487,17 +502,31 @@ def real_time_knn():
             knn_feature = pos_now - pos_past
             try:
                 knn_ds, knn_is = kd_tree.query(knn_feature, k=3)
+
+                candidates = []
+                print("Context:", context)
                 for knn_d, knn_i in zip(knn_ds, knn_is):
                     item = db[knn_i]
-                    print(f"  Phrase: {item['phrase']}")
+                    phrase = item["phrase"]
+                    if phrase.lower() in ["one", "two", "three", "1", "2", "3"]:
+                        continue
+                    nll = compute_nll(context, phrase)
+                    weight = knn_d + nll * 0.01
+                    candidates.append((weight, phrase))
+
+                    print(f"  Phrase: {phrase}")
                     print(f"  Duration: {item['duration']:.2f}s")
                     print(f"  Distance: {knn_d:.2f}")
+                    print(f"  NLL: {nll:.2f}")
                 print("=" * 100)
-                for knn_d, knn_i in zip(knn_ds, knn_is):
-                    item: str = db[knn_i]["phrase"]
-                    if item.lower() not in ["one", "two", "three", "1", "2", "3"]:
-                        tts_player.put_text_if_ready(db[knn_is[0]]["phrase"])
-                        break
+
+                if candidates:
+                    # Find the one with the lowest weight
+                    phrase = min(candidates, key=lambda x: x[0])[1]
+                    if tts_player.ready.is_set():
+                        tts_player.put_text(phrase)
+                        context += phrase + " "
+                        tts_player.ready.clear()
             except ValueError:
                 pass
 

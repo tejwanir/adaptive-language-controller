@@ -222,7 +222,8 @@ def run_offline():
 
     # torch.save(transformer_model.state_dict(), f'{MODELS_FP}/model_v0_1')
 
-def run_online(transformer_model, delta_t=0.2):
+def run_online(transformer_model, tokenizer, delta_t=0.2):
+    print('Starting online...')
     collect_interval = 1 # seconds
 
     q = mp.Queue()
@@ -234,19 +235,26 @@ def run_online(transformer_model, delta_t=0.2):
         'timestamp': [],
         'skeletons': []
     }
+    print('Enter collection loop...')
     while True:
         timestamp, pose_data = q.get()
         # t_interval_start = first timestamp of the data collection interval
-        t_interval_start = timestamp if t_interval_start is None else t_interval_start
+        t_interval_start = timestamp // delta_t * delta_t if t_interval_start is None else t_interval_start
 
         # if timestamp within the interval, append it for future processing
         if timestamp < t_interval_start + collect_interval:
+            # print(f'{len(interval_records['timestamp'])=}')
             interval_records['timestamp'].append(timestamp)
             interval_records['skeletons'].append(pose_data)
         # else, process the interval's collected data for transformer decoding
         else:
-            pose_df = pd.DataFrame.from_records(interval_records)
-            conv_input, text_tensor = preprocess_pipeline(pose_df)
+            print('Processing...')
+            # print(f'{interval_records["skeletons"][-1]=}')
+            # pose_df = pd.DataFrame.from_records(interval_records)
+            # HOTFIX
+            audio_fp = 'vincent-dev\data\lightbuzz_table_1\cut_audio.wav'
+            force_fp = 'vincent-dev\data\lightbuzz_table_1\cut_data.csv'
+            conv_input, text_tensor = preprocess_pipeline(audio_fp, interval_records, force_fp, tokenizer, from_records=True)
             conv_output = convolution(conv_input, D_MODEL)
 
             transformer_input = conv_output.transpose(1,0)
@@ -261,9 +269,33 @@ def run_online(transformer_model, delta_t=0.2):
                 'timestamp': [],
                 'skeletons': []
             }
+            t_interval_start = None
+    proc_collect.terminate()
 
+def test_online():
+    q = mp.Queue()
+    proc_collect = mp.Process(target=collect_poses, args=(q,))
+    proc_collect.start()
+
+    t, p = [], []
+    while True:
+        timestamp, pose_data = q.get()
+        t.append(timestamp)
+        p.append(pose_data)
+        if len(t) == 5:
+            break
+
+    print(p)
+    print(t)
 
 
 if __name__ == '__main__':
-    run_offline()
+    # run_offline()
 
+
+    tokenizer = transformers.BertTokenizerFast.from_pretrained('bert-base-uncased')
+    model = Transformer(D_MODEL, tokenizer)
+    model.load_state_dict(torch.load('vincent-dev\models\model_v0_1'))
+    run_online(model, tokenizer)
+
+    # test_online()

@@ -15,11 +15,12 @@ from util import NumpyEncoder
 DELTA_T = 0.2
 DATA_FP = 'data'
 KEEP_JOINTS = [
-    'ShoulderRight',
-    'ElbowRight',
-    'WristRight',
-    'ShoulderLeft',
-    'ElbowLeft',
+    # HOTFIX
+    # 'ShoulderRight',
+    # 'ElbowRight',
+    # 'WristRight',
+    # 'ShoulderLeft',
+    # 'ElbowLeft',
     'WristLeft',
 ]
 KEEP_MEASUREMENTS_DICT = {
@@ -90,11 +91,18 @@ def filter_skeleton(skeletons_list, user_id, keep_joints=KEEP_JOINTS):
     pose_df['skeletons'] is a list of json objects, with each element
     corresponding to a different "user" from the original video
     '''
-    for skeleton in skeletons_list:
-        # filter by user_id
-        if skeleton['user_id'] == user_id:
-            # filter by desired joints
-            return {joint: skeleton[joint] for joint in skeleton if joint in keep_joints}
+    # HOTFIX
+    if isinstance(skeletons_list, list):
+        for skeleton in skeletons_list:
+            # filter by user_id
+            if 'user_id' in skeleton:
+                if skeleton['user_id'] == user_id:
+                    # filter by desired joints
+                    return {joint: skeleton[joint] for joint in skeleton if joint in keep_joints}
+    else:
+        skeleton = skeletons_list[0]
+        ret = {joint: skeleton[joint] for joint in skeleton if joint in keep_joints}
+        return ret
 
 def bucketize_pose_data(pose_df, delta_t=DELTA_T, keep_joints=KEEP_JOINTS,
                         keep_measurements_dict=KEEP_MEASUREMENTS_DICT):
@@ -157,15 +165,72 @@ def bucketize_pose_data(pose_df, delta_t=DELTA_T, keep_joints=KEEP_JOINTS,
 
     return pd.DataFrame.from_records(records)
 
-def preprocess_pose_data(pose_fp, user_id):
+def bucketize_pose_data_measurementless(pose_df, delta_t=DELTA_T, keep_joints=KEEP_JOINTS,
+                        keep_measurements_dict=KEEP_MEASUREMENTS_DICT):
+    '''
+    bucketizee measurementless
+    '''
+    # HOTFIX
+    pose_df.to_csv('vincent-dev\server_output.csv')
+
+    # start_t = 1707358708.6 # HARDCODED
+    start_t = pose_df['timestamp'][0] // delta_t * delta_t
+    curr_bucket = start_t
+
+    records = []
+
+    curr_record = {
+        'timestamp': curr_bucket,
+        'skeletons': {
+            joint: np.zeros(3) for joint in keep_joints
+        }
+    }
+
+    bucket_count = 0
+    for ix, row in pose_df.iterrows():
+        if row['timestamp'] < curr_bucket + delta_t:
+            # sum up data for each measurement, for each joint
+            for joint in keep_joints:
+                curr_record['skeletons'][joint] += np.array(row['skeletons'][joint])
+            bucket_count += 1
+
+        else:
+            # divide accumulated coordinates by bucket_count to get average of data
+            for joint in keep_joints:
+                assert bucket_count > 0
+                curr_record['skeletons'][joint] /= bucket_count
+
+            # append curr_record to records
+            records.append(curr_record)
+
+            # update curr_bucket, create new curr_record, and reset bucket_count
+            curr_bucket += delta_t
+            curr_record = {
+                'timestamp': curr_bucket,
+                'skeletons': {
+                    joint: np.zeros(3) for joint in keep_joints
+                }
+            }
+            bucket_count = 0
+
+    return pd.DataFrame.from_records(records)
+
+def preprocess_pose_data(pose_fp, user_id, from_records=False):
     '''
     1. Filter out skeleton data by user_id and keep_joints
     2. Bucketize time serialized data into discrete buckets for alignment
     (see respective functions for more detailed descriptions)
     '''
-    pose_df = pd.read_json(pose_fp, lines=True, convert_dates=False)
+    if not from_records:
+        pose_df = pd.read_json(pose_fp, lines=True, convert_dates=False)
+    else:
+        pose_df = pd.DataFrame.from_records(pose_fp)
+        print(pose_df.iloc[0]['skeletons'])
     pose_df['skeletons'] = pose_df['skeletons'].apply(filter_skeleton, args=[user_id])
-    pose_df = bucketize_pose_data(pose_df)
+    if not from_records: # HOTFIX
+        pose_df = bucketize_pose_data(pose_df)
+    else:
+        pose_df = bucketize_pose_data_measurementless(pose_df)
     return pose_df
 
 
@@ -238,29 +303,38 @@ def preprocess_force_data(force_fp):
 
 ### data alignment ###
 
-def align_data(text_df, pose_df, force_df):
+def align_data(text_df, pose_df, force_df, from_records=False):
     # make feature tensors the same length
-    t_start = max(pose_df.iloc[0]['timestamp'], force_df.iloc[0]['timestamp'])
-    t_end = min(pose_df.iloc[-1]['timestamp'], force_df.iloc[-1]['timestamp'])
-    pose_df = pose_df.iloc[
-        pose_df.index[pose_df['timestamp'] == t_start][0] : pose_df.index[pose_df['timestamp'] == t_end][0]
-    ]
-    force_df = force_df.iloc[
-        force_df.index[force_df['timestamp'] == t_start][0] : force_df.index[force_df['timestamp'] == t_end][0]
-    ]
+    # HOTFIX
+    # t_start = max(pose_df.iloc[0]['timestamp'], force_df.iloc[0]['timestamp'])
+    # t_end = min(pose_df.iloc[-1]['timestamp'], force_df.iloc[-1]['timestamp'])
+    # pose_df = pose_df.iloc[
+    #     pose_df.index[pose_df['timestamp'] == t_start][0] : pose_df.index[pose_df['timestamp'] == t_end][0]
+    # ]
+    # force_df = force_df.iloc[
+    #     force_df.index[force_df['timestamp'] == t_start][0] : force_df.index[force_df['timestamp'] == t_end][0]
+    # ]
 
     # convert feature dataframes into tensors
-    pose_tensor = torch.tensor(
-        [
-            [value for joint in skeleton for measurement in skeleton[joint] for value in skeleton[joint][measurement]]
-            for skeleton in pose_df['skeletons']
-        ]
-    )
+    if not from_records: # HOTFIX
+        pose_tensor = torch.tensor(
+            [
+                [value for joint in skeleton for measurement in skeleton[joint] for value in skeleton[joint][measurement]]
+                for skeleton in pose_df['skeletons']
+            ]
+        )
+    else:
+        pose_tensor = torch.tensor(
+            [
+                [measurement for joint in skeleton for measurement in skeleton[joint]]
+                for skeleton in pose_df['skeletons']
+            ]
+        )
     force_tensor = torch.tensor(force_df['reading']).reshape((-1, 1))
     text_tensor = torch.tensor(text_df['text']).reshape((-1, 1))
     # pad text_df as necessary to match length of pose and force df
     # TODO: replace padding with silence token, current 0 = [PAD] (is this ok? better to have specific silence token?)
-    text_tensor = torch.cat((text_tensor, torch.zeros(pose_tensor.shape[0] - text_tensor.shape[0], 1)), dim=0).long()
+    # text_tensor = torch.cat((text_tensor, torch.zeros(pose_tensor.shape[0] - text_tensor.shape[0], 1)), dim=0).long() # HOTFIX
 
     # !!! feature list of all feature tensors, add all used features here !!!
     feature_tensors = [
@@ -289,22 +363,32 @@ def align_data(text_df, pose_df, force_df):
 
 ### preprocessing pipeline ###
 
-def preprocess_pipeline(audio_fp_list, pose_fp_list, force_fp_list, tokenizer):
+def preprocess_pipeline(audio_fp_list, pose_fp_list, force_fp_list, tokenizer, from_records=False):
     # check that there are the same number of audio, pose, and force data files
-    assert len(set((len(audio_fp_list), len(pose_fp_list), len(force_fp_list)))) == 1
+    # assert len(set((len(audio_fp_list), len(pose_fp_list), len(force_fp_list)))) == 1 # HOTFIX
 
     full_feature_tensor = torch.tensor([])
     full_text_tensor = torch.tensor([], dtype=torch.int64)
-    for audio_fp, pose_fp, force_fp in zip(
-        audio_fp_list, pose_fp_list, force_fp_list
-    ):
-        text_df = preprocess_text_data(audio_fp, tokenizer)
-        pose_df = preprocess_pose_data(pose_fp, user_id=1)
-        force_df = preprocess_force_data(force_fp)
+    if not from_records:
+        for audio_fp, pose_fp, force_fp in zip(
+            audio_fp_list, pose_fp_list, force_fp_list
+        ):
+            text_df = preprocess_text_data(audio_fp, tokenizer)
+            pose_df = preprocess_pose_data(pose_fp, user_id=1)
+            force_df = preprocess_force_data(force_fp)
 
-        aligned_tensor, text_tensor = align_data(text_df, pose_df, force_df)
+            aligned_tensor, text_tensor = align_data(text_df, pose_df, force_df)
+            full_feature_tensor = torch.cat((full_feature_tensor, aligned_tensor), dim=0)
+            full_text_tensor = torch.cat((full_text_tensor, text_tensor), dim=0)
+    else: # from dataframe
+        # HOTFIX, clean this up 
+        text_df = preprocess_text_data(audio_fp_list, tokenizer)
+        pose_df = preprocess_pose_data(pose_fp_list, 0, from_records=True) 
+        force_df = preprocess_force_data(force_fp_list)
+        aligned_tensor, text_tensor = align_data(text_df, pose_df, force_df, from_records=True)
         full_feature_tensor = torch.cat((full_feature_tensor, aligned_tensor), dim=0)
         full_text_tensor = torch.cat((full_text_tensor, text_tensor), dim=0)
+
 
     # conv requires shape (B, C_in, L_in)
     # full_tensor = full_tensor.permute(0,2,1)

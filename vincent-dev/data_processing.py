@@ -14,15 +14,14 @@ from util import NumpyEncoder
 
 DELTA_T = 0.2
 DATA_FP = 'data'
-KEEP_JOINTS = [
-    # HOTFIX
-    # 'ShoulderRight',
-    # 'ElbowRight',
-    # 'WristRight',
-    # 'ShoulderLeft',
-    # 'ElbowLeft',
+KEEP_JOINTS = {
+    'ShoulderRight',
+    'ElbowRight',
+    'WristRight',
+    'ShoulderLeft',
+    'ElbowLeft',
     'WristLeft',
-]
+}
 KEEP_MEASUREMENTS_DICT = {
     'pos2D': 2,
     'pos3D': 3,
@@ -101,6 +100,7 @@ def filter_skeleton(skeletons_list, user_id, keep_joints=KEEP_JOINTS):
                     return {joint: skeleton[joint] for joint in skeleton if joint in keep_joints}
     else:
         skeleton = skeletons_list[0]
+        print(f'{keep_joints=}')
         ret = {joint: skeleton[joint] for joint in skeleton if joint in keep_joints}
         return ret
 
@@ -170,9 +170,6 @@ def bucketize_pose_data_measurementless(pose_df, delta_t=DELTA_T, keep_joints=KE
     '''
     bucketizee measurementless
     '''
-    # HOTFIX
-    pose_df.to_csv('vincent-dev\server_output.csv')
-
     # start_t = 1707358708.6 # HARDCODED
     start_t = pose_df['timestamp'][0] // delta_t * delta_t
     curr_bucket = start_t
@@ -221,16 +218,20 @@ def preprocess_pose_data(pose_fp, user_id, from_records=False):
     2. Bucketize time serialized data into discrete buckets for alignment
     (see respective functions for more detailed descriptions)
     '''
-    if not from_records:
-        pose_df = pd.read_json(pose_fp, lines=True, convert_dates=False)
-    else:
-        pose_df = pd.DataFrame.from_records(pose_fp)
-        print(pose_df.iloc[0]['skeletons'])
-    pose_df['skeletons'] = pose_df['skeletons'].apply(filter_skeleton, args=[user_id])
     if not from_records: # HOTFIX
+        pose_df = pd.read_json(pose_fp, lines=True, convert_dates=False)
+        pose_df['skeletons'] = pose_df['skeletons'].apply(filter_skeleton, args=[user_id])
         pose_df = bucketize_pose_data(pose_df)
     else:
-        pose_df = bucketize_pose_data_measurementless(pose_df)
+        pose_df = pd.DataFrame.from_records(pose_fp)
+
+        # only keep joints that are measured in every frame from the records
+        # HOTFIX
+        keep_joints = KEEP_JOINTS
+        for skeleton in pose_df['skeletons']:
+            keep_joints = keep_joints & set(key for key in skeleton[0].keys())
+        pose_df['skeletons'] = pose_df['skeletons'].apply(filter_skeleton, args=[user_id, keep_joints])
+        pose_df = bucketize_pose_data_measurementless(pose_df, keep_joints=keep_joints)
     return pose_df
 
 

@@ -1,3 +1,4 @@
+import json
 import multiprocessing as mp
 import numpy as np
 import pandas as pd
@@ -255,10 +256,12 @@ def run_online(transformer_model, tokenizer, delta_t=0.2):
             audio_fp = 'vincent-dev\data\lightbuzz_table_1\cut_audio.wav'
             force_fp = 'vincent-dev\data\lightbuzz_table_1\cut_data.csv'
             conv_input, text_tensor = preprocess_pipeline(audio_fp, interval_records, force_fp, tokenizer, from_records=True)
+            print(f'{conv_input.shape=}')
             conv_output = convolution(conv_input, D_MODEL)
 
             transformer_input = conv_output.transpose(1,0)
             # transformer_target = text_tensor.squeeze()
+            print(f'{transformer_input.shape=}')
 
             preds = transformer_model.predict(transformer_input)
             print(preds)
@@ -277,16 +280,29 @@ def test_online():
     proc_collect = mp.Process(target=collect_poses, args=(q,))
     proc_collect.start()
 
-    t, p = [], []
+    records = {
+        'timestamp': [],
+        'skeletons': []
+    }
+
     while True:
         timestamp, pose_data = q.get()
-        t.append(timestamp)
-        p.append(pose_data)
-        if len(t) == 5:
+        records['timestamp'].append(timestamp)
+        records['skeletons'].append(pose_data)
+        if len(records['timestamp']) == 100:
             break
 
-    print(p)
-    print(t)
+    pose_df = pd.DataFrame.from_records(records)
+    # pose_df.to_csv('server_output.csv')
+    print(pose_df.dtypes)
+    # print(set(pose_df['skeletons'][0][0].keys()))
+
+    # for record in records:
+    #     with open('vincent-dev\server_output.jsonl', 'a') as f:
+    #         f.write(json.dumps(record))
+
+
+    proc_collect.terminate()
 
 
 if __name__ == '__main__':
@@ -296,6 +312,6 @@ if __name__ == '__main__':
     tokenizer = transformers.BertTokenizerFast.from_pretrained('bert-base-uncased')
     model = Transformer(D_MODEL, tokenizer)
     model.load_state_dict(torch.load('vincent-dev\models\model_v0_1'))
-    run_online(model, tokenizer)
+    # run_online(model, tokenizer)
 
-    # test_online()
+    test_online()

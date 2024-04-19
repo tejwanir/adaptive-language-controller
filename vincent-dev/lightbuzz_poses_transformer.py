@@ -1,4 +1,7 @@
-# file copied from KNN branch (3/19/24 version)
+"""
+File copied from KNN branch (3/19/24 version), but with modified formatting
+for proper transformer preprocessing input.
+"""
 
 import json
 import multiprocessing as mp
@@ -9,7 +12,7 @@ from typing import Optional, TypedDict
 import cv2
 import numpy as np
 
-from filter_poses import FrameCorrector, PoseFilter, UserPoses, preprocess_frame
+from filter_poses_transformer import FrameCorrector, PoseFilter, UserPoses, preprocess_frame
 
 
 class OpenSensorRequest(TypedDict):

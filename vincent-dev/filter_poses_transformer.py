@@ -1,3 +1,8 @@
+"""
+File copied from KNN branch (3/19/24 version), but with modified formatting
+for proper transformer preprocessing input.
+"""
+
 import json
 from pathlib import Path
 from typing import Generic, Iterable, TypeVar
@@ -121,16 +126,7 @@ def preprocess_frame(
     skeletons = frame["skeletons"]
     return (
         timestamp,
-        {
-            skeleton["user_id"]: {
-                joint: np.array(joint_info["pos3D"])
-                for joint, joint_info in skeleton.items()
-                if joint != "user_id"
-                and joint != "confidence"
-                and joint_info["confidence"] >= confidence_threshold
-            }
-            for skeleton in skeletons
-        },
+        skeletons,
     )
 
 

@@ -10,7 +10,7 @@ import tqdm
 import transformers
 
 from data_processing import preprocess_pipeline
-from lightbuzz_poses import collect_poses
+from lightbuzz_poses_transformer import collect_poses
 
 
 ### global constants ###

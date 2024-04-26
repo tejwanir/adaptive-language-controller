@@ -29,6 +29,7 @@ KEEP_MEASUREMENTS_DICT = {
 }
 
 
+
 ### audio/text processing ###
 
 def get_transcription(audio_fp, whisper_model_name='base'):
@@ -72,15 +73,18 @@ def tokenize_text_data(text_df, tokenizer):
                                       .astype('int64'))
     return text_df
 
-def preprocess_text_data(audio_fp, tokenizer):
-    transcription = get_transcription(audio_fp, whisper_model_name='base')
+def preprocess_text_data(audio_fp, tokenizer, from_audio_json=False):
+    if from_audio_json:
+        with open(audio_fp, 'r') as f:
+            transcription = json.load(f)
+    else:
+        transcription = get_transcription(audio_fp, whisper_model_name='base')
     text_df = bucketize_text_data(transcription)
     text_df = tokenize_text_data(text_df, tokenizer)
     return text_df
 
 
 ### pose data processing ###
-
 def filter_skeleton(skeletons_list, user_id, keep_joints=KEEP_JOINTS):
     '''
     Filter the pose data to contain only the user specified by `user_id`.
@@ -90,6 +94,7 @@ def filter_skeleton(skeletons_list, user_id, keep_joints=KEEP_JOINTS):
     pose_df['skeletons'] is a list of json objects, with each element
     corresponding to a different "user" from the original video
     '''
+    # TODO: filter by confidence threshold too?
     # HOTFIX
     if isinstance(skeletons_list, list):
         for skeleton in skeletons_list:
@@ -212,18 +217,21 @@ def bucketize_pose_data_measurementless(pose_df, delta_t=DELTA_T, keep_joints=KE
 
     return pd.DataFrame.from_records(records)
 
-def preprocess_pose_data(pose_fp, user_id, from_records=False):
+def preprocess_pose_data(pose_data, user_id, from_records=False):
     '''
+    If from_records=False, pose_data should be a valid filepath containing pose data
+    If from_records=True, pose_data should be a dict of records (see formatting in preprocess_pipeline)
+
     1. Filter out skeleton data by user_id and keep_joints
     2. Bucketize time serialized data into discrete buckets for alignment
     (see respective functions for more detailed descriptions)
     '''
     if not from_records: # HOTFIX
-        pose_df = pd.read_json(pose_fp, lines=True, convert_dates=False)
+        pose_df = pd.read_json(pose_data, lines=True, convert_dates=False)
         pose_df['skeletons'] = pose_df['skeletons'].apply(filter_skeleton, args=[user_id])
         pose_df = bucketize_pose_data(pose_df)
     else:
-        pose_df = pd.DataFrame.from_records(pose_fp)
+        pose_df = pd.DataFrame.from_records(pose_data)
 
         # only keep joints that are measured in every frame from the records
         # HOTFIX
@@ -305,43 +313,60 @@ def preprocess_force_data(force_fp):
 ### data alignment ###
 
 def align_data(text_df, pose_df, force_df, from_records=False):
+    '''
+    Align feature DataFrames so that they are the same length and are aligned by
+    time bucket.
+    Does not require all features to be inputed, i.e., one or more feature_df's
+    may be None (e.g., inference time doesn't use all features)
+    '''
     # make feature tensors the same length
-    # HOTFIX
-    # t_start = max(pose_df.iloc[0]['timestamp'], force_df.iloc[0]['timestamp'])
-    # t_end = min(pose_df.iloc[-1]['timestamp'], force_df.iloc[-1]['timestamp'])
-    # pose_df = pose_df.iloc[
-    #     pose_df.index[pose_df['timestamp'] == t_start][0] : pose_df.index[pose_df['timestamp'] == t_end][0]
-    # ]
-    # force_df = force_df.iloc[
-    #     force_df.index[force_df['timestamp'] == t_start][0] : force_df.index[force_df['timestamp'] == t_end][0]
-    # ]
+    if pose_df is not None and force_df is not None:
+        t_start = max(pose_df.iloc[0]['timestamp'], force_df.iloc[0]['timestamp'])
+        t_end = min(pose_df.iloc[-1]['timestamp'], force_df.iloc[-1]['timestamp'])
+        pose_df = pose_df.iloc[
+            pose_df.index[pose_df['timestamp'] == t_start][0] : pose_df.index[pose_df['timestamp'] == t_end][0]
+        ]
+        force_df = force_df.iloc[
+            force_df.index[force_df['timestamp'] == t_start][0] : force_df.index[force_df['timestamp'] == t_end][0]
+        ]
 
     # convert feature dataframes into tensors
-    if not from_records: # HOTFIX
-        pose_tensor = torch.tensor(
-            [
-                [value for joint in skeleton for measurement in skeleton[joint] for value in skeleton[joint][measurement]]
-                for skeleton in pose_df['skeletons']
-            ]
-        )
-    else:
-        pose_tensor = torch.tensor(
-            [
-                [measurement for joint in skeleton for measurement in skeleton[joint]]
-                for skeleton in pose_df['skeletons']
-            ]
-        )
-    force_tensor = torch.tensor(force_df['reading']).reshape((-1, 1))
-    text_tensor = torch.tensor(text_df['text']).reshape((-1, 1))
-    # pad text_df as necessary to match length of pose and force df
-    # TODO: replace padding with silence token, current 0 = [PAD] (is this ok? better to have specific silence token?)
-    # text_tensor = torch.cat((text_tensor, torch.zeros(pose_tensor.shape[0] - text_tensor.shape[0], 1)), dim=0).long() # HOTFIX
 
-    # !!! feature list of all feature tensors, add all used features here !!!
+    # if not from_records: # HOTFIX
+    #     pose_tensor = torch.tensor(
+    #         [
+    #             [value for joint in skeleton for measurement in skeleton[joint] for value in skeleton[joint][measurement]]
+    #             for skeleton in pose_df['skeletons']
+    #         ]
+    #     )
+    # else:
+    #     pose_tensor = torch.tensor(
+    #         [
+    #             [measurement for joint in skeleton for measurement in skeleton[joint]]
+    #             for skeleton in pose_df['skeletons']
+    #         ]
+    #     )
+    if text_df is not None:
+        text_tensor = torch.tensor(text_df['text']).reshape((-1, 1))
+        # pad text_df as necessary to match length of pose and force df
+        # TODO: replace padding with silence token, current 0 = [PAD] (is this ok? better to have specific silence token?)
+        text_tensor = torch.cat((text_tensor, torch.zeros(len(pose_df) - text_tensor.shape[0], 1)), dim=0).long()
+    if pose_df is not None:
+        # pose_tensor is of the shape time_buckets x measurements
+        pose_tensor = torch.tensor(
+                [
+                    [value for joint in skeleton for measurement in skeleton[joint] for value in skeleton[joint][measurement]]
+                    for skeleton in pose_df['skeletons']
+                ]
+            )
+    if force_df is not None:
+        force_tensor = torch.tensor(force_df['reading']).reshape((-1, 1))# HOTFIX
+
+    # !!! feature list of all feature tensors, add all used features here
     feature_tensors = [
-        # text_tensor,
+        text_tensor,
         pose_tensor,
-        # force_tensor,
+        force_tensor,
     ]
 
     # check that all dataframes are the same length
@@ -364,28 +389,55 @@ def align_data(text_df, pose_df, force_df, from_records=False):
 
 ### preprocessing pipeline ###
 
-def preprocess_pipeline(audio_fp_list, pose_fp_list, force_fp_list, tokenizer, from_records=False):
+def preprocess_pipeline(audio_data, pose_data, force_data, tokenizer,
+                        from_records=False, from_audio_json=False):
+    '''
+    If from_records=False, x_data should be a list of valid filepaths from
+    which to read data. This should be used for training
+    If from_records=True, x_data should be a dictionary of records, where the
+    records should be of the following format:
+    e.g. records = {
+        'timestamp': [list of timestamps],
+        'skeletons': [list of skeleton],
+        ...
+    }
+    where the lengths of the values of records should all be equal. This should
+    be used in real-time inference and, therefore, some features (e.g., audio_data)
+    maybe be None.
+
+    If from_audio_json=True, audio filepaths are the transcription jsons instead
+    of the raw audio data; mainly used for more efficient testing purposes.
+    '''
     # check that there are the same number of audio, pose, and force data files
     # assert len(set((len(audio_fp_list), len(pose_fp_list), len(force_fp_list)))) == 1 # HOTFIX
 
     full_feature_tensor = torch.tensor([])
     full_text_tensor = torch.tensor([], dtype=torch.int64)
     if not from_records:
+        # read from list of filepaths
         for audio_fp, pose_fp, force_fp in zip(
-            audio_fp_list, pose_fp_list, force_fp_list
+            audio_data, pose_data, force_data
         ):
-            text_df = preprocess_text_data(audio_fp, tokenizer)
-            pose_df = preprocess_pose_data(pose_fp, user_id=1)
+            text_df = preprocess_text_data(audio_fp, tokenizer, from_audio_json=from_audio_json)
+            pose_df = preprocess_pose_data(pose_fp, user_id=1) # HARDCODED
             force_df = preprocess_force_data(force_fp)
 
             aligned_tensor, text_tensor = align_data(text_df, pose_df, force_df)
             full_feature_tensor = torch.cat((full_feature_tensor, aligned_tensor), dim=0)
             full_text_tensor = torch.cat((full_text_tensor, text_tensor), dim=0)
-    else: # from dataframe
-        # HOTFIX, clean this up 
-        text_df = preprocess_text_data(audio_fp_list, tokenizer)
-        pose_df = preprocess_pose_data(pose_fp_list, 0, from_records=True) 
-        force_df = preprocess_force_data(force_fp_list)
+    else:
+        # read from records
+        # HOTFIX, clean this up
+        user_id = 0 # HARDCODED
+        text_df = None # for now, not using audio/text at inference, so don't need text_df
+        pose_df = None
+        force_df = None
+
+        if pose_data is not None:
+            pose_df = preprocess_pose_data(pose_data, user_id, from_records=from_records)
+        if force_data is not None:
+            force_df = preprocess_force_data(force_data)
+
         aligned_tensor, text_tensor = align_data(text_df, pose_df, force_df, from_records=True)
         full_feature_tensor = torch.cat((full_feature_tensor, aligned_tensor), dim=0)
         full_text_tensor = torch.cat((full_text_tensor, text_tensor), dim=0)
@@ -407,15 +459,19 @@ if __name__ == '__main__':
 
     audio_fp_list = [
         f'{DATA_FP}/lightbuzz_table_{i}/cut_audio.wav'
-        for i in range(1,2)
+        for i in range(1,7)
+    ]
+    audio_json_list = [
+        f'{DATA_FP}/lightbuzz_table_{i}/transcription_base.json'
+        for i in range(1,7)
     ]
     pose_fp_list = [
         f'{DATA_FP}/lightbuzz_table_{i}/cut_poses.jsonl'
-        for i in range(1,2)
+        for i in range(1,7)
     ]
     force_fp_list = [
         f'{DATA_FP}/lightbuzz_table_{i}/cut_data.csv'
-        for i in range(1,2)
+        for i in range(1,7)
     ]
 
     tokenizer = transformers.BertTokenizerFast.from_pretrained('bert-base-uncased')
@@ -434,6 +490,7 @@ if __name__ == '__main__':
     # for i in range(10):
     #     print(pose_df.iloc[i]['timestamp'])
     #     print(pose_df.iloc[i]['skeletons']['ShoulderRight']['pos2D'])
+    # print(f'{pose_df.shape=}') # time_buckets x 2
 
     # # force testing
     # force_df = preprocess_force_data(force_fp)
@@ -447,9 +504,13 @@ if __name__ == '__main__':
     # print(conv_input.shape)
     # print(text_tensor.shape)
 
-    conv_input, text_tensor = preprocess_pipeline(audio_fp_list, pose_fp_list, force_fp_list, tokenizer)
+    # test preprocess from filepaths
+    conv_input, text_tensor = preprocess_pipeline(audio_json_list, pose_fp_list, force_fp_list, tokenizer,
+                                                  from_audio_json=True)
     print(conv_input)
     print(f'{conv_input.shape=}, {text_tensor.shape=}')
     print(text_tensor.dtype)
+
+    # test preprocess from records
 
     pass

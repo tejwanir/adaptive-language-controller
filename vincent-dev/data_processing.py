@@ -445,7 +445,7 @@ def preprocess_pipeline(audio_data, pose_data, force_data, tokenizer,
 
     # conv requires shape (B, C_in, L_in)
     # full_tensor = full_tensor.permute(0,2,1)
-    full_feature_tensor = full_feature_tensor.permute(1,0)
+    # full_feature_tensor = full_feature_tensor.permute(1,0)
     return full_feature_tensor, full_text_tensor
 
 
@@ -457,21 +457,22 @@ if __name__ == '__main__':
     pose_fp = f'{DATA_FP}/lightbuzz_table_1/cut_poses.jsonl'
     force_fp = f'{DATA_FP}/lightbuzz_table_1/cut_data.csv'
 
+    file_range = range(1,3)
     audio_fp_list = [
         f'{DATA_FP}/lightbuzz_table_{i}/cut_audio.wav'
-        for i in range(1,7)
+        for i in file_range
     ]
     audio_json_list = [
         f'{DATA_FP}/lightbuzz_table_{i}/transcription_base.json'
-        for i in range(1,7)
+        for i in file_range
     ]
     pose_fp_list = [
         f'{DATA_FP}/lightbuzz_table_{i}/cut_poses.jsonl'
-        for i in range(1,7)
+        for i in file_range
     ]
     force_fp_list = [
         f'{DATA_FP}/lightbuzz_table_{i}/cut_data.csv'
-        for i in range(1,7)
+        for i in file_range
     ]
 
     tokenizer = transformers.BertTokenizerFast.from_pretrained('bert-base-uncased')

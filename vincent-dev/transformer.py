@@ -18,18 +18,20 @@ DATA_FP = 'data'
 D_MODEL = 64
 MODELS_FP = 'models'
 
-class CombinedDataset(Dataset):
-    def __init__(self, input_tensor, target_tensor):
-        self.input = input_tensor.detach().clone()
-        self.target = target_tensor.detach().clone()
 
-        assert self.input.shape[0] == self.target.shape[0] # tensors are of the same length
+class AlignedDataset(Dataset):
+    def __init__(self, audio_data, pose_data, force_data, tokenizer,
+                 from_records=False, from_audio_json=False):
+        feature_tensor, text_tensor = preprocess_pipeline(audio_data, pose_data, force_data, tokenizer,
+                                                          from_records=from_records, from_audio_json=from_audio_json)
+        self.feature_tensor = feature_tensor
+        self.text_tensor = text_tensor.squeeze()
 
     def __len__(self):
-        return self.input.shape[0]
+        return self.feature_tensor.shape[0]
 
     def __getitem__(self, ix):
-        return self.input[ix], self.target[ix]
+        return self.feature_tensor[ix], self.text_tensor[ix]
 
 class Transformer(nn.Module):
     def __init__(self, d_model, tokenizer, max_output_length=1):
@@ -91,6 +93,52 @@ class Transformer(nn.Module):
         out = torch.argmax(out, dim=1)
         return self.tokenizer.batch_decode(out)
 
+class ConvTransformer(nn.Module):
+    def __init__(self, d_model, tokenizer, max_output_length=1):
+        super().__init__()
+        self.d_model = d_model
+        self.tokenizer = tokenizer
+        self.transformer = Transformer(d_model, tokenizer, max_output_length)
+
+    def convolution(self, conv_input):
+        self.conv_config = {
+            'in_channels': conv_input.shape[0],
+            'out_channels': self.d_model,
+            'kernel_size': 3,
+            'stride': 1,
+            'padding': 1,
+            'dilation': 1,
+            'bias': False
+        }
+        conv = nn.Sequential(
+            nn.Conv1d(**self.conv_config),
+            nn.ReLU(),
+            # nn.BatchNorm1d(64)
+        ).double()
+        return conv(conv_input)
+
+    def forward(self, feature_tensor, target_text):
+        conv_input = feature_tensor.permute(1,0) # conv requires shape (C_in, L_in)
+        conv_output = self.convolution(conv_input)
+        transformer_input = conv_output.transpose(1,0)
+        return self.transformer(transformer_input, target_text)
+
+    def predict(self, feature_tensor):
+        # start with transformer implementation, then improve
+        conv_input = feature_tensor.permute(1,0) # conv requires shape (C_in, L_in)
+        conv_output = self.convolution(conv_input)
+        transformer_input = conv_output.transpose(1,0)
+
+        encoded_src = self.transformer.encode(transformer_input)
+
+        tgt = torch.ones((transformer_input.shape[0])).int()
+        tgt = tgt * 101 # TODO: hardcoded start token
+
+        # tgt = torch.randint(2000, 3000, (transformer_input.shape[0],)).int()
+        out = self.transformer.decode(tgt, encoded_src)
+        out = torch.softmax(out, dim=1)
+        out = torch.argmax(out, dim=1)
+        return self.tokenizer.batch_decode(out)
 
 
 
@@ -107,7 +155,7 @@ def train(model, device, train_loader, val_loader=None, num_epochs=20, loss_fn=n
         loss_fn.to(device)
 
         # Train the model
-        for epoch in range(num_epochs):
+        for epoch in tqdm.tqdm(range(num_epochs)):
             model.train()
             epoch_train_loss = 0
             step_loss = []
@@ -164,48 +212,17 @@ def convolution(conv_input, d_model):
     conv_output = conv_model(conv_input)
     return conv_output
 
-def run_offline():
-    ### read and preprocess data ###
-    audio_fp_list = [
-        f'{DATA_FP}/lightbuzz_table_{i}/cut_audio.wav'
-        for i in range(1,7)
-    ]
-    pose_fp_list = [
-        f'{DATA_FP}/lightbuzz_table_{i}/cut_poses.jsonl'
-        for i in range(1,7)
-    ]
-    force_fp_list = [
-        f'{DATA_FP}/lightbuzz_table_{i}/cut_data.csv'
-        for i in range(1,7)
-    ]
-    tokenizer = transformers.BertTokenizerFast.from_pretrained('bert-base-uncased')
 
-    conv_input, text_tensor = preprocess_pipeline(audio_fp_list, pose_fp_list, force_fp_list, tokenizer)
-    print(f'{conv_input.shape=}')
+def run_offline(audio_data, pose_data, force_data, tokenizer, from_audio_json=False):
+    print('start run offline...')
+    aligned_dataset = AlignedDataset(audio_data, pose_data, force_data, tokenizer,
+                                     from_audio_json=from_audio_json)
+    aligned_dataloader = DataLoader(aligned_dataset, batch_size=64, shuffle=False)
+    # TODO: train/test split
+    print('data preprocessed...')
 
-    ### convolution ###
-    conv_output = convolution(conv_input, D_MODEL)
-
-    ### transformer ###
-    # transformer_config = {
-    #     'd_model': D_MODEL,
-    #     'nhead': 8,
-    #     'num_encoder_layers': 6,
-    #     'num_decoder_layers': 6,
-    #     'batch_first': True,
-    # }
-
-    transformer_model = Transformer(D_MODEL, tokenizer)
-    transformer_target = text_tensor.squeeze()
-    transformer_input = conv_output.transpose(1,0)
-
-
-
-
-
-    ### dataset ###
-    dataset = CombinedDataset(transformer_input, transformer_target)
-    train_loader = DataLoader(dataset, batch_size=16, shuffle=False)
+    ### model ###
+    conv_transformer = ConvTransformer(D_MODEL, tokenizer)
 
     ### training ###
     if torch.cuda.is_available():
@@ -213,11 +230,13 @@ def run_offline():
     else:
         device = torch.device('cpu')
 
-    # train(transformer_model, device, train_loader) # train model
-    transformer_model.load_state_dict(torch.load(f'{MODELS_FP}/model_v0')) # load model weights, testing
+    print('start transformer training...')
+    train(conv_transformer, device, aligned_dataloader) # train model
+    # transformer_model.load_state_dict(torch.load(f'{MODELS_FP}/model_v0')) # load model weights, testing
 
+    ### inference ###
     start = time.time()
-    decoded_output = transformer_model.predict(transformer_input)
+    decoded_output = conv_transformer.predict(aligned_dataset.feature_tensor)
     print(decoded_output)
     print(f'Decoding time elapsed: {time.time() - start}')
 
@@ -255,7 +274,8 @@ def run_online(transformer_model, tokenizer, delta_t=0.2):
             # HOTFIX
             audio_fp = 'vincent-dev\data\lightbuzz_table_1\cut_audio.wav'
             force_fp = 'vincent-dev\data\lightbuzz_table_1\cut_data.csv'
-            conv_input, text_tensor = preprocess_pipeline(audio_fp, interval_records, force_fp, tokenizer, from_records=True)
+            feature_tensor, text_tensor = preprocess_pipeline(audio_fp, interval_records, force_fp, tokenizer, from_records=True)
+            conv_input = feature_tensor.permute(1,0) # conv requires shape (C_in, L_in)
             print(f'{conv_input.shape=}')
             conv_output = convolution(conv_input, D_MODEL)
 
@@ -306,12 +326,40 @@ def test_online():
 
 
 if __name__ == '__main__':
-    # run_offline()
-
-
+    file_range = range(1,3)
+    audio_fp_list = [
+        f'{DATA_FP}/lightbuzz_table_{i}/cut_audio.wav'
+        for i in file_range
+    ]
+    audio_json_list = [
+        f'{DATA_FP}/lightbuzz_table_{i}/transcription_base.json'
+        for i in file_range
+    ]
+    pose_fp_list = [
+        f'{DATA_FP}/lightbuzz_table_{i}/cut_poses.jsonl'
+        for i in file_range
+    ]
+    force_fp_list = [
+        f'{DATA_FP}/lightbuzz_table_{i}/cut_data.csv'
+        for i in file_range
+    ]
     tokenizer = transformers.BertTokenizerFast.from_pretrained('bert-base-uncased')
-    model = Transformer(D_MODEL, tokenizer)
-    model.load_state_dict(torch.load('vincent-dev\models\model_v0_1'))
+
+
+    run_offline(audio_json_list, pose_fp_list, force_fp_list, tokenizer, from_audio_json=True)
+
+
+    # model = Transformer(D_MODEL, tokenizer)
+    # model.load_state_dict(torch.load('vincent-dev\models\model_v0_1'))
     # run_online(model, tokenizer)
 
-    test_online()
+
+    # test_online()
+
+
+    # aligned_dataset = AlignedDataset(audio_json_list, pose_fp_list, force_fp_list, tokenizer, from_audio_json=True)
+    # aligned_dataloader = DataLoader(aligned_dataset, batch_size=16, shuffle=False)
+    # model = ConvTransformer(D_MODEL, tokenizer)
+    # for f, t in aligned_dataloader:
+    #     print(model(f, t))
+    #     break

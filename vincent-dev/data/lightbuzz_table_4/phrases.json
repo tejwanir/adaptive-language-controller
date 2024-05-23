@@ -1,0 +1,87 @@
+[
+  {
+    "phrase": "one",
+    "start_time": 0.0,
+    "end_time": 0.28
+  },
+  {
+    "phrase": "two",
+    "start_time": 0.62,
+    "end_time": 0.92
+  },
+  {
+    "phrase": "three",
+    "start_time": 1.28,
+    "end_time": 1.4
+  },
+  {
+    "phrase": "i want you to move your hand away from yourself as you are swiping the table",
+    "start_time": 1.9,
+    "end_time": 6.94
+  },
+  {
+    "phrase": "keep going away from yourself",
+    "start_time": 7.72,
+    "end_time": 9.8
+  },
+  {
+    "phrase": "keep going away from yourself",
+    "start_time": 10.2,
+    "end_time": 11.58
+  },
+  {
+    "phrase": "now i want you to move in towards yourself",
+    "start_time": 12.34,
+    "end_time": 14.56
+  },
+  {
+    "phrase": "keep moving inwards",
+    "start_time": 15.2,
+    "end_time": 16.76
+  },
+  {
+    "phrase": "you're moving in towards yourself",
+    "start_time": 16.96,
+    "end_time": 18.9
+  },
+  {
+    "phrase": "keep moving into yourself",
+    "start_time": 19.32,
+    "end_time": 21.12
+  },
+  {
+    "phrase": "and this time i want you to move away from your body",
+    "start_time": 21.12,
+    "end_time": 24.88
+  },
+  {
+    "phrase": "keep moving away from your body",
+    "start_time": 25.44,
+    "end_time": 27.44
+  },
+  {
+    "phrase": "keep moving away",
+    "start_time": 27.44,
+    "end_time": 28.9
+  },
+  {
+    "phrase": "and this time you want to move in towards your body",
+    "start_time": 28.9,
+    "end_time": 31.84
+  },
+  {
+    "phrase": "keep moving inwards",
+    "start_time": 32.46,
+    "end_time": 33.54
+  },
+  {
+    "phrase": "keep moving inwards",
+    "start_time": 33.84,
+    "end_time": 34.98
+  },
+  {
+    "phrase": "keep moving inwards and we're done",
+    "start_time": 35.2,
+    "end_time": 37.06
+  }
+]

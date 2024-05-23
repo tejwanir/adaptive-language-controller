@@ -6,7 +6,7 @@ import torch
 import transformers
 import whisper
 
-from util import NumpyEncoder
+import util
 
 
 
@@ -15,17 +15,17 @@ from util import NumpyEncoder
 DELTA_T = 0.2
 DATA_FP = 'data'
 KEEP_JOINTS = {
-    'ShoulderRight',
-    'ElbowRight',
-    'WristRight',
-    'ShoulderLeft',
-    'ElbowLeft',
+    # 'ShoulderRight',
+    # 'ElbowRight',
+    # 'WristRight',
+    # 'ShoulderLeft',
+    # 'ElbowLeft',
     'WristLeft',
 }
 KEEP_MEASUREMENTS_DICT = {
-    'pos2D': 2,
+    # 'pos2D': 2,
     'pos3D': 3,
-    'orientation': 4
+    # 'orientation': 4
 }
 
 

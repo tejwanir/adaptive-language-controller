@@ -16,6 +16,7 @@ import bert_score as bert_score_lib
 
 from data_processing_phrase import preprocess_pipeline
 from lightbuzz_poses_transformer import collect_poses
+from util import eval_metrics
 
 
 ### global constants ###
@@ -278,78 +279,6 @@ def train(model, device, train_loader, val_loader=None, num_epochs=20, loss_fn=n
 
         return train_losses, val_losses
 
-def eval(model, dataset):
-    '''
-    Current metrics:
-    * BLEU score
-      HF reference: https://huggingface.co/spaces/evaluate-metric/bleu
-    * ROUGE score
-      HF reference: https://huggingface.co/spaces/evaluate-metric/rouge
-
-      Bleu measures precision: how much the words (and/or n-grams) in the machine generated summaries appeared in the human reference summaries. Rouge measures recall: how much the words (and/or n-grams) in the human reference summaries appeared in the machine generated summaries
-
-    * BERTScore (https://arxiv.org/abs/1904.09675)
-    '''
-    # for now, looping over each sample in dataset individually instead of in batches
-    d = {}
-    bert_scorer = bert_score_lib.BERTScorer(
-        lang='en',
-        # rescale_with_baseline=True
-    )
-
-    for ix in tqdm.tqdm(range(len(dataset)), total=len(dataset)):
-        ### load predictions and references ###
-        src, references = dataset[ix]
-        decoded_output = model.predict(src.unsqueeze(0), use_beam_search=False)
-        # convert predictions and references to strings; remove cls/sep tokens, convert to text
-        for i, token in enumerate(references):
-            sep_ix = None
-            if token.item() == model.tokenizer.sep_token_id:
-                sep_ix = i
-                break
-        references = [' '.join(model.tokenizer.batch_decode(references[1:sep_ix]))]
-
-        predictions = decoded_output.split()[1:]
-        if predictions[-1] == model.tokenizer.sep_token_id:
-            predictions = predictions[:-1]
-        predictions = [' '.join(predictions)]
-
-        print(f'{ix=}')
-        print(f'{references=}')
-        print(f'{predictions=}')
-
-
-        ### BLEU ###
-        bleu_scorer = evaluate.load('bleu')
-        # bleu_score = dict with keys ['bleu', 'precisions', 'brevity_penalty', 'length_ratio', 'translation_length', 'reference_length']
-        bleu_score = bleu_scorer.compute(predictions=predictions, references=references)
-        print(f'{bleu_score=}')
-
-        ### ROUGE ###
-        rouge_scorer = evaluate.load('rouge')
-        # rouge_score = dict with keys ['rouge1', 'rouge2', 'rougeL', 'rougeLsum']
-        rouge_score = rouge_scorer.compute(predictions=predictions, references=references)
-        print(f'{rouge_score=}')
-
-        ### BERTScore ###
-        # bert_score = tuple (precision, recall, F1)
-        bert_score = bert_scorer.score(cands=predictions, refs=references)
-        bert_score = {
-            'precision': bert_score[0].item(),
-            'recall': bert_score[1].item(),
-            'f1': bert_score[2].item()
-        }
-        print(f'{bert_score=}')
-
-        d[ix] = {
-            'bleu_score': bleu_score,
-            'rouge_score': rouge_score,
-            'bert_score': bert_score,
-        }
-
-    with open('eval.json', 'w') as f:
-        json.dump(d, f)
-
 
 
 def run_offline(audio_data, pose_data, force_data, tokenizer, from_audio_json=False):
@@ -377,13 +306,16 @@ def run_offline(audio_data, pose_data, force_data, tokenizer, from_audio_json=Fa
     # train_losses, val_losses = train(conv_transformer, device, train_loader, val_loader, num_epochs=30) # train model
 
     # ### plot losses ###
-    # plt.plot(np.arange(len(train_losses)), train_losses, label='training loss')
-    # plt.plot(np.arange(len(val_losses)), val_losses, label='validation loss')
+    # plt.plot(np.arange(len(train_losses)), train_losses, label='Training loss')
+    # plt.plot(np.arange(len(val_losses)), val_losses, label='Validation loss')
+    # plt.title('Phrase ConvTransformer Loss Curves')
+    # plt.xlabel('epoch')
+    # plt.ylabel('loss')
     # plt.legend()
 
     ### load saved model ###
     print('load transformer...')
-    model_name = f'{MODELS_FP}/model_phrase_v1.3'
+    model_name = f'{MODELS_FP}/model_phrase_v1.2'
     conv_transformer.load_state_dict(torch.load(model_name)) # load model weights, testing
 
     ### inference ###
@@ -398,8 +330,8 @@ def run_offline(audio_data, pose_data, force_data, tokenizer, from_audio_json=Fa
         print(f'Predicted: {decoded_output}')
         # print(f'Decoding time elapsed: {time.time() - start}')
 
-    # ### evaluate ###
-    # eval(conv_transformer, aligned_dataset)
+    ### evaluate ###
+    eval_metrics(conv_transformer, aligned_dataset)
 
     # ### save trained model ###
     # model_name = f'{MODELS_FP}/model_phrase_v1.2'

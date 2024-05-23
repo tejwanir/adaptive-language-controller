@@ -6,24 +6,24 @@ import torch
 import transformers
 import whisper
 
-from util import NumpyEncoder, parse_transcription_to_phrases
+import util
 
 
 ### global constants ###
 DELTA_T = 0.2
 # as of 5/20/24, server only outputs WristLeft pos3D
 KEEP_JOINTS = {
-    # 'ShoulderRight',
-    # 'ElbowRight',
-    # 'WristRight',
-    # 'ShoulderLeft',
-    # 'ElbowLeft',
+    'ShoulderRight',
+    'ElbowRight',
+    'WristRight',
+    'ShoulderLeft',
+    'ElbowLeft',
     'WristLeft',
 }
 KEEP_MEASUREMENTS_DICT = {
-    # 'pos2D': 2,
+    'pos2D': 2,
     'pos3D': 3,
-    # 'orientation': 4
+    'orientation': 4
 }
 MAX_TEXT_SEQ_LENGTH = 32
 MAX_FEATURE_SEQ_LENGTH = 64
@@ -368,7 +368,7 @@ if __name__ == '__main__':
 
     # with open('data/lightbuzz_table_1/transcription_base.json', 'r') as f:
     #     transcription = json.load(f)
-    # segments = parse_transcription_to_phrases(transcription)
+    # segments = util.parse_transcription_to_phrases(transcription)
     # print(json.dumps(segments, indent=2))
 
     file_range = range(1,7)
@@ -390,7 +390,7 @@ if __name__ == '__main__':
     # with open(f'data/lightbuzz_table_{i}/transcription_base.json', 'r') as f:
     #     transcription = json.load(f)
     # print(f'start {i}')
-    # segments = parse_transcription_to_phrases(transcription)
+    # segments = util.parse_transcription_to_phrases(transcription)
     # with open(f'data/lightbuzz_table_{i}/phrases.json', 'w') as f:
     #     json.dump(segments, f, indent=2)
     # print(f'end {i}')

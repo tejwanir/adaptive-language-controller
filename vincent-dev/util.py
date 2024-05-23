@@ -7,6 +7,8 @@ import torch.utils.data as tud
 import transformers
 from transformers import BertTokenizerFast
 import matplotlib.pyplot as plt
+import evaluate
+import bert_score as bert_score_lib
 
 import data_processing_phrase as dpp
 
@@ -78,6 +80,78 @@ def parse_transcription_to_phrases(
         json.dump(segments, f, indent=2)
     return segments
 
+def eval_metrics(model, dataset):
+    '''
+    Current metrics:
+    * BLEU score
+      HF reference: https://huggingface.co/spaces/evaluate-metric/bleu
+    * ROUGE score
+      HF reference: https://huggingface.co/spaces/evaluate-metric/rouge
+
+      Bleu measures precision: how much the words (and/or n-grams) in the machine generated summaries appeared in the human reference summaries. Rouge measures recall: how much the words (and/or n-grams) in the human reference summaries appeared in the machine generated summaries
+
+    * BERTScore (https://arxiv.org/abs/1904.09675)
+    '''
+    # for now, looping over each sample in dataset individually instead of in batches
+    d = {}
+    bert_scorer = bert_score_lib.BERTScorer(
+        lang='en',
+        rescale_with_baseline=True,
+    )
+
+    for ix in tqdm.tqdm(range(len(dataset)), total=len(dataset)):
+        ### load predictions and references ###
+        src, references = dataset[ix]
+        decoded_output = model.predict(src.unsqueeze(0), use_beam_search=False)
+        # convert predictions and references to strings; remove cls/sep tokens, convert to text
+        for i, token in enumerate(references):
+            sep_ix = None
+            if token.item() == model.tokenizer.sep_token_id:
+                sep_ix = i
+                break
+        references = [' '.join(model.tokenizer.batch_decode(references[1:sep_ix]))]
+
+        predictions = decoded_output.split()[1:]
+        if predictions[-1] == model.tokenizer.sep_token_id:
+            predictions = predictions[:-1]
+        predictions = [' '.join(predictions)]
+
+        print(f'{ix=}')
+        print(f'{references=}')
+        print(f'{predictions=}')
+
+
+        ### BLEU ###
+        bleu_scorer = evaluate.load('bleu')
+        # bleu_score = dict with keys ['bleu', 'precisions', 'brevity_penalty', 'length_ratio', 'translation_length', 'reference_length']
+        bleu_score = bleu_scorer.compute(predictions=predictions, references=references)
+        print(f'{bleu_score=}')
+
+        ### ROUGE ###
+        rouge_scorer = evaluate.load('rouge')
+        # rouge_score = dict with keys ['rouge1', 'rouge2', 'rougeL', 'rougeLsum']
+        rouge_score = rouge_scorer.compute(predictions=predictions, references=references)
+        print(f'{rouge_score=}')
+
+        ### BERTScore ###
+        # bert_score = tuple (precision, recall, F1)
+        bert_score = bert_scorer.score(cands=predictions, refs=references)
+        bert_score = {
+            'precision': bert_score[0].item(),
+            'recall': bert_score[1].item(),
+            'f1': bert_score[2].item()
+        }
+        print(f'{bert_score=}')
+
+        d[ix] = {
+            'bleu_score': bleu_score,
+            'rouge_score': rouge_score,
+            'bert_score': bert_score,
+        }
+
+    with open('eval.json', 'w') as f:
+        json.dump(d, f)
+
 def eval_visualization(eval_json):
     # create histograms of metrics
 
@@ -102,8 +176,18 @@ def eval_visualization(eval_json):
     plt.title('ROUGE scores')
     plt.show()
 
-    # plt.hist(bert_scores_precision, bins=50)
-    # plt.show()
+    plt.hist(bert_scores_precision, bins=50)
+    plt.title('BERTScore Precision')
+    plt.show()
+
+    plt.hist(bert_scores_recall, bins=50)
+    plt.title('BERTScore Recall')
+    plt.show()
+
+    print(f'bleu avg: {np.mean(bleu_scores)}')
+    print(f'rouge avg: {np.mean(rouge_scores)}')
+    print(f'bertscore_precision avg: {np.mean(bert_scores_precision)}')
+    print(f'bertscore_recall avg: {np.mean(bert_scores_recall)}')
 
 def misc_metrics():
     file_range = range(1,7)
@@ -134,6 +218,6 @@ def misc_metrics():
 
 
 if __name__ == '__main__':
-    # eval_visualization('eval.json')
+    eval_visualization('eval_phrase_1.3.json')
 
-    misc_metrics()
+    # misc_metrics()

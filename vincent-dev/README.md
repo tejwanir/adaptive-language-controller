@@ -17,3 +17,4 @@
 * model_phrase_v1.3: train with ignore_index=0, only WristLeft
     * num_epochs=20, lr=5e-4
     * very little diversity in predictions
+* model_phrase_v1.4: testing only WristLeft

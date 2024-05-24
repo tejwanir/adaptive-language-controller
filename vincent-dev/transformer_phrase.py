@@ -340,58 +340,46 @@ def run_offline(audio_data, pose_data, force_data, tokenizer, from_audio_json=Fa
 
     # plt.show()
 
-# def run_online(transformer_model, tokenizer, delta_t=0.2):
-#     print('Starting online...')
-#     collect_interval = 1 # seconds
+def run_online(conv_transformer, tokenizer, delta_t=0.2):
+    print('Starting online...')
+    collect_interval = 1 # seconds
 
-#     q = mp.Queue()
-#     proc_collect = mp.Process(target=collect_poses, args=(q,))
-#     proc_collect.start()
+    q = mp.Queue()
+    proc_collect = mp.Process(target=collect_poses, args=(q,))
+    proc_collect.start()
 
-#     t_interval_start = None
-#     interval_records = {
-#         'timestamp': [],
-#         'skeletons': []
-#     }
-#     print('Enter collection loop...')
-#     while True:
-#         timestamp, pose_data = q.get()
-#         # t_interval_start = first timestamp of the data collection interval
-#         t_interval_start = timestamp // delta_t * delta_t if t_interval_start is None else t_interval_start
+    t_interval_start = None
+    interval_records = {
+        'timestamp': [],
+        'skeletons': []
+    }
+    print('Enter collection loop...')
+    while True:
+        timestamp, pose_data = q.get()
+        # t_interval_start = first timestamp of the data collection interval
+        t_interval_start = timestamp // delta_t * delta_t if t_interval_start is None else t_interval_start
 
-#         # if timestamp within the interval, append it for future processing
-#         if timestamp < t_interval_start + collect_interval:
-#             # print(f'{len(interval_records['timestamp'])=}')
-#             interval_records['timestamp'].append(timestamp)
-#             interval_records['skeletons'].append(pose_data)
-#         # else, process the interval's collected data for transformer decoding
-#         else:
-#             print('Processing...')
-#             # print(f'{interval_records["skeletons"][-1]=}')
-#             # pose_df = pd.DataFrame.from_records(interval_records)
-#             # HOTFIX
-#             audio_fp = 'vincent-dev\data\lightbuzz_table_1\cut_audio.wav'
-#             force_fp = 'vincent-dev\data\lightbuzz_table_1\cut_data.csv'
-#             feature_tensor, text_tensor = preprocess_pipeline(audio_fp, interval_records, force_fp, tokenizer, from_records=True)
-#             conv_input = feature_tensor.permute(1,0) # conv requires shape (C_in, L_in)
-#             print(f'{conv_input.shape=}')
-#             conv_output = convolution(conv_input, D_MODEL)
-
-#             transformer_input = conv_output.transpose(1,0)
-#             # transformer_target = text_tensor.squeeze()
-#             print(f'{transformer_input.shape=}')
-
-#             preds = transformer_model.predict(transformer_input)
-#             print(preds)
+        # if timestamp within the interval, append it for future processing
+        if timestamp < t_interval_start + collect_interval:
+            # print(f'{len(interval_records['timestamp'])=}')
+            interval_records['timestamp'].append(timestamp)
+            interval_records['skeletons'].append(pose_data)
+        # else, process the interval's collected data for transformer decoding
+        else:
+            print('Processing...')
+            # HOTFIX
+            feature_tensor, text_tensor = preprocess_pipeline(None, interval_records, None, tokenizer, from_records=True)
+            decoded_output = conv_transformer.predict(feature_tensor, use_beam_search=False)
+            print(decoded_output)
 
 
-#             # reset interval records
-#             interval_records = {
-#                 'timestamp': [],
-#                 'skeletons': []
-#             }
-#             t_interval_start = None
-#     proc_collect.terminate()
+            # reset interval records
+            interval_records = {
+                'timestamp': [],
+                'skeletons': []
+            }
+            t_interval_start = None
+    proc_collect.terminate()
 
 # def test_online():
 #     q = mp.Queue()
@@ -425,31 +413,22 @@ def run_offline(audio_data, pose_data, force_data, tokenizer, from_audio_json=Fa
 
 if __name__ == '__main__':
 
-    file_range = range(1,7)
-    audio_fp_list, phrases_fp_list, pose_fp_list, force_fp_list = [], [] ,[], []
-    for i in file_range:
-        audio_fp_list.append(f'data/lightbuzz_table_{i}/cut_audio.wav')
-        phrases_fp_list.append(f'data/lightbuzz_table_{i}/phrases.json')
-        pose_fp_list.append(f'data/lightbuzz_table_{i}/cut_poses.jsonl')
-        force_fp_list.append(f'data/lightbuzz_table_{i}/cut_data.csv')
+    # ### data files
+    # file_range = range(1,7)
+    # audio_fp_list, phrases_fp_list, pose_fp_list, force_fp_list = [], [] ,[], []
+    # for i in file_range:
+    #     audio_fp_list.append(f'data/lightbuzz_table_{i}/cut_audio.wav')
+    #     phrases_fp_list.append(f'data/lightbuzz_table_{i}/phrases.json')
+    #     pose_fp_list.append(f'data/lightbuzz_table_{i}/cut_poses.jsonl')
+    #     force_fp_list.append(f'data/lightbuzz_table_{i}/cut_data.csv')
 
     tokenizer = transformers.BertTokenizerFast.from_pretrained('bert-base-uncased')
 
-    # run_offline(audio_json_list, pose_fp_list, force_fp_list, tokenizer)
-    run_offline(phrases_fp_list, pose_fp_list, force_fp_list, tokenizer)
+    # ### test offline
+    # # run_offline(audio_json_list, pose_fp_list, force_fp_list, tokenizer)
+    # run_offline(phrases_fp_list, pose_fp_list, force_fp_list, tokenizer)
 
-
-    # model = Transformer(D_MODEL, tokenizer)
-    # model.load_state_dict(torch.load('vincent-dev\models\model_v0_1'))
-    # run_online(model, tokenizer)
-
-
-    # test_online()
-
-
-    # aligned_dataset = AlignedDataset(audio_json_list, pose_fp_list, force_fp_list, tokenizer, from_audio_json=True)
-    # aligned_dataloader = DataLoader(aligned_dataset, batch_size=16, shuffle=False)
-    # model = ConvTransformer(D_MODEL, tokenizer)
-    # for f, t in aligned_dataloader:
-    #     print(model(f, t))
-    #     break
+    ### test online
+    model = ConvTransformer(D_MODEL, tokenizer)
+    model.load_state_dict(torch.load('vincent-dev\models\model_v1.3'))
+    run_online(model, tokenizer)

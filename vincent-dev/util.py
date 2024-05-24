@@ -170,18 +170,22 @@ def eval_visualization(eval_json):
 
     plt.hist(bleu_scores, bins=50)
     plt.title('BLEU scores')
+    plt.savefig('bleu_hist.png')
     plt.show()
 
     plt.hist(rouge_scores, bins=50)
     plt.title('ROUGE scores')
+    plt.savefig('rouge_hist.png')
     plt.show()
 
     plt.hist(bert_scores_precision, bins=50)
     plt.title('BERTScore Precision')
+    plt.savefig('bs_precision_hist.png')
     plt.show()
 
     plt.hist(bert_scores_recall, bins=50)
     plt.title('BERTScore Recall')
+    plt.savefig('bs_recall_hist.png')
     plt.show()
 
     print(f'bleu avg: {np.mean(bleu_scores)}')

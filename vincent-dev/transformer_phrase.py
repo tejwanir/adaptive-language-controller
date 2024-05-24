@@ -430,5 +430,5 @@ if __name__ == '__main__':
 
     ### test online
     model = ConvTransformer(D_MODEL, tokenizer)
-    model.load_state_dict(torch.load('vincent-dev\models\model_v1.3'))
+    model.load_state_dict(torch.load('vincent-dev\models\model_phrase_v1.3'))
     run_online(model, tokenizer)

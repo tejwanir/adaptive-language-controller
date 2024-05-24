@@ -15,7 +15,7 @@ import evaluate
 import bert_score as bert_score_lib
 
 from data_processing_phrase import preprocess_pipeline
-from lightbuzz_poses_transformer import collect_poses
+from lightbuzz_poses import collect_poses
 from util import eval_metrics
 
 
